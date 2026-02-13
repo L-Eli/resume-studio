@@ -57,7 +57,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Email</div>
-                  <div className="font-medium">contact@ecotech.com</div>
+                  <div className="font-medium">service@ecotech.tw</div>
                 </div>
               </motion.div>
 
