@@ -65,15 +65,14 @@ export function Footer() {
             © {new Date().getFullYear()} ECO Tech. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            {["LinkedIn", "Twitter", "GitHub"].map((social) => (
-              <a
-                key={social}
-                href="#"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {social}
-              </a>
-            ))}
+            <a
+              href="https://github.com/ecotech-tw"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              GitHub
+            </a>
           </div>
         </div>
       </div>

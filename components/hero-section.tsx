@@ -5,6 +5,38 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
+type Floater = {
+  width: number
+  height: number
+  left: string
+  top: string
+  alpha: number
+  duration: number
+}
+
+function mulberry32(seed: number) {
+  let a = seed >>> 0
+  return () => {
+    a |= 0
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+const FLOATERS: Floater[] = Array.from({ length: 8 }, (_, i) => {
+  const rand = mulberry32(0x2c1b3c6d ^ (i * 0x9e3779b1))
+  const width = 20 + rand() * 40
+  const height = 20 + rand() * 40
+  const left = `${10 + rand() * 80}%`
+  const top = `${10 + rand() * 80}%`
+  const alpha = 0.1 + rand() * 0.15
+  const duration = 10 + rand() * 10
+
+  return { width, height, left, top, alpha, duration }
+})
+
 export function HeroSection() {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({
@@ -27,16 +59,16 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px]" />
         
         {/* Floating Elements - Antigravity Effect */}
-        {[...Array(8)].map((_, i) => (
+        {FLOATERS.map((f, i) => (
           <motion.div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: 20 + Math.random() * 40,
-              height: 20 + Math.random() * 40,
-              left: `${10 + Math.random() * 80}%`,
-              top: `${10 + Math.random() * 80}%`,
-              background: `radial-gradient(circle, rgba(45, 212, 191, ${0.1 + Math.random() * 0.15}) 0%, transparent 70%)`,
+              width: f.width,
+              height: f.height,
+              left: f.left,
+              top: f.top,
+              backgroundImage: `radial-gradient(circle, rgba(45, 212, 191, ${f.alpha}) 0%, transparent 70%)`,
             }}
             animate={{
               y: [0, -40, 0],
@@ -44,7 +76,7 @@ export function HeroSection() {
               rotate: [0, 180, 360],
             }}
             transition={{
-              duration: 10 + Math.random() * 10,
+              duration: f.duration,
               repeat: Infinity,
               ease: "easeInOut",
               delay: i * 0.5,
