@@ -1,25 +1,33 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+
+type ParticlePosition = {
+  x: number
+  y: number
+}
 
 export function LoadingScreen() {
   const [isLoading, setIsLoading] = useState(true)
   const [progress, setProgress] = useState(0)
   const [isMounted, setIsMounted] = useState(false)
-
-  // Generate random positions only on client side
-  const particlePositions = useMemo(() => {
-    if (!isMounted) return []
-    return [...Array(6)].map(() => ({
-      x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-      y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
-    }))
-  }, [isMounted])
+  const [particlePositions, setParticlePositions] = useState<ParticlePosition[]>([])
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (!isMounted) return
+
+    setParticlePositions(
+      Array.from({ length: 6 }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+      })),
+    )
+  }, [isMounted])
 
   useEffect(() => {
     const interval = setInterval(() => {

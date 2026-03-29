@@ -1,0 +1,71 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+env:
+  GCP_PROJECT_ID: ecotech-tw
+  GAR_LOCATION: asia-east1
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}
+  CLOUD_RUN_SERVICE: eco-tech-website
+  CLOUD_RUN_REGION: asia-east1
+  IMAGE_NAME: eco-tech-website
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required configuration
+        shell: bash
+        run: |
+          test -n "${GAR_REPOSITORY}" || { echo "Missing GitHub repository variable GAR_REPOSITORY"; exit 1; }
+          test -n "${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}" || { echo "Missing secret GCP_WORKLOAD_IDENTITY_PROVIDER"; exit 1; }
+          test -n "${{ secrets.GCP_SERVICE_ACCOUNT }}" || { echo "Missing secret GCP_SERVICE_ACCOUNT"; exit 1; }
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
+
+      - name: Build image
+        run: |
+          docker build \
+            -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" \
+            -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest" \
+            .
+
+      - name: Push image
+        run: |
+          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest"
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.CLOUD_RUN_SERVICE }}
+          region: ${{ env.CLOUD_RUN_REGION }}
+          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Show service URL
+        run: gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} --region ${{ env.CLOUD_RUN_REGION }} --format='value(status.url)'
