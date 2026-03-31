@@ -1,71 +1,71 @@
-name: Deploy Production
+name: Deploy to Cloud Run via WIF
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
-  group: deploy-production
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  GCP_PROJECT_ID: ecotech-tw
-  GAR_LOCATION: asia-east1
-  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY }}
-  CLOUD_RUN_SERVICE: eco-tech-website
-  CLOUD_RUN_REGION: asia-east1
-  IMAGE_NAME: eco-tech-website
+  PROJECT_ID: "ecotech-tw"
+  PROJECT_NUMBER: "211536603435"
+  REGION: "asia-east1"
+  SERVICE_NAME: "eco-tech-website"
+  IMAGE_URL: "asia-east1-docker.pkg.dev/ecotech-tw/eco-tech-website/eco-tech-website"
 
 jobs:
   deploy:
+    name: Build and Release
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Validate required configuration
-        shell: bash
+      - name: Show Build Info
         run: |
-          test -n "${GAR_REPOSITORY}" || { echo "Missing GitHub repository variable GAR_REPOSITORY"; exit 1; }
-          test -n "${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}" || { echo "Missing secret GCP_WORKLOAD_IDENTITY_PROVIDER"; exit 1; }
-          test -n "${{ secrets.GCP_SERVICE_ACCOUNT }}" || { echo "Missing secret GCP_SERVICE_ACCOUNT"; exit 1; }
+          echo "正在為專案 ecotech-tw 執行部署"
+          echo "當前提交編號: ${{ github.sha }}"
+          echo "執行者: ${{ github.actor }}"
 
-      - name: Authenticate to Google Cloud
+      - name: Google Auth via WIF
+        id: auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: "access_token"
+          workload_identity_provider: "projects/211536603435/locations/global/workloadIdentityPools/github-actions-pool/providers/github-oidc-v2"
+          service_account: "github-actions-deployer@ecotech-tw.iam.gserviceaccount.com"
 
-      - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v2
+      - name: Docker Auth
+        uses: docker/login-action@v3
         with:
-          project_id: ${{ env.GCP_PROJECT_ID }}
+          username: "oauth2access"
+          password: "${{ steps.auth.outputs.access_token }}"
+          registry: "asia-east1-docker.pkg.dev"
 
-      - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev --quiet
-
-      - name: Build image
+      - name: Build and Push Container
         run: |
-          docker build \
-            -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" \
-            -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest" \
-            .
-
-      - name: Push image
-        run: |
-          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest"
+          docker build -t ${{ env.IMAGE_URL }}:${{ github.sha }} .
+          docker tag ${{ env.IMAGE_URL }}:${{ github.sha }} ${{ env.IMAGE_URL }}:latest
+          docker push ${{ env.IMAGE_URL }}:${{ github.sha }}
+          docker push ${{ env.IMAGE_URL }}:latest
 
       - name: Deploy to Cloud Run
+        id: deploy
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          service: ${{ env.CLOUD_RUN_SERVICE }}
-          region: ${{ env.CLOUD_RUN_REGION }}
-          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.REGION }}
+          image: ${{ env.IMAGE_URL }}:${{ github.sha }}
+          flags: "--allow-unauthenticated"
 
       - name: Show service URL
-        run: gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} --region ${{ env.CLOUD_RUN_REGION }} --format='value(status.url)'
+        run: echo "部署成功！網站網址是： ${{ steps.deploy.outputs.url }}"

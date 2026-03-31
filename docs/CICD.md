@@ -2,33 +2,14 @@
 
 ## Current design
 
-- CI runs on every pull request.
-- CI runs on every push and pull request.
-- CD is kept as a manual workflow until Google Cloud deployment access is ready.
+- CI runs on every push and pull request through GitHub Actions.
+- CD runs through GitHub Actions WIF deployment on `main`.
 - Deployment target is Google Cloud Run production only.
 - Docker images are pushed to Google Artifact Registry.
 
-## Repository variables and secrets
+## GitHub Actions CI
 
-Create these in GitHub repository settings before enabling deployment:
-
-### Repository variable
-
-- `GAR_REPOSITORY`: Your Artifact Registry repository name in `asia-east1`
-
-### Repository secrets
-
-- `GCP_WORKLOAD_IDENTITY_PROVIDER`: Full Workload Identity Provider resource name
-- `GCP_SERVICE_ACCOUNT`: Service account email used by GitHub Actions
-
-## Fixed project values in workflow
-
-- Project ID: `ecotech-tw`
-- Cloud Run service: `eco-tech-website`
-- Cloud Run region: `asia-east1`
-- Image name: `eco-tech-website`
-
-## What CI checks today
+The GitHub Actions CI workflow checks:
 
 - `npm ci`
 - `npm run lint`
@@ -37,21 +18,44 @@ Create these in GitHub repository settings before enabling deployment:
 - `npm run build`
 - `docker build`
 
-## What Level 3 includes
+## GitHub Actions CD
 
-- A minimal Node-based test setup using `node:test` and `tsx`
-- One low-risk schema validation test for the contact form
-- No browser automation and no external API mocking yet
+The deployment workflow lives in `.github/workflows/deploy.yml`.
 
-## OIDC recommendation
+The deployment defaults are set to:
 
-The deployment workflow is set up for GitHub OIDC with Google Cloud Workload Identity Federation.
+- Project ID: `ecotech-tw`
+- Artifact Registry repository: `eco-tech-website`
+- Cloud Run service: `eco-tech-website`
+- Cloud Run region: `asia-east1`
+- Image name: `eco-tech-website`
 
-This is preferred over storing a long-lived service account JSON key in GitHub.
+## WIF configuration
 
-## Deployment flow
+The workflow uses Google Workload Identity Federation with:
 
-1. Trigger the deploy workflow manually
-2. GitHub Actions authenticates to Google Cloud
-3. Docker image is built and pushed to Artifact Registry
-4. Cloud Run deploys the new image revision
+- Workload Identity Provider:
+  `projects/211536603435/locations/global/workloadIdentityPools/github-actions-pool/providers/github-oidc-v2`
+- Service account:
+  `github-actions-deployer@ecotech-tw.iam.gserviceaccount.com`
+
+When a new commit lands on `main`, GitHub Actions will:
+
+1. Authenticate to Google Cloud via WIF
+2. Build the Docker image
+3. Push the image to Artifact Registry
+4. Deploy the image to Cloud Run
+
+## Required IAM
+
+The deployer service account should have:
+
+- `roles/run.admin`
+- `roles/artifactregistry.writer`
+- `roles/logging.logWriter`
+
+If your Cloud Run service uses a custom runtime service account, also grant the deployer service account permission to act as that runtime service account.
+
+## Legacy note
+
+`cloudbuild.yaml` is not the active deployment path for this project.
