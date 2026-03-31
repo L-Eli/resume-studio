@@ -61,14 +61,9 @@ export function Footer() {
 
         {/* Bottom */}
         <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-center md:text-left">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} ECO Tech. All rights reserved.
-            </p>
-            <p className="text-xs text-muted-foreground/80 mt-1">
-              Deployed via GCP
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} ECO Tech. All rights reserved.
+          </p>
           <div className="flex items-center gap-6">
             <a
               href="https://github.com/ecotech-tw"
