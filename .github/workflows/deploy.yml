@@ -12,10 +12,9 @@ concurrency:
 
 env:
   PROJECT_ID: "ecotech-tw"
-  PROJECT_NUMBER: "211536603435"
   REGION: "asia-east1"
   SERVICE_NAME: "eco-tech-website"
-  IMAGE_URL: "asia-east1-docker.pkg.dev/ecotech-tw/eco-tech-website/eco-tech-website"
+  IMAGE_URL: "asia-east1-docker.pkg.dev/ecotech-tw/eco-tech-website/website-image"
 
 jobs:
   deploy:
@@ -44,12 +43,14 @@ jobs:
           workload_identity_provider: "projects/211536603435/locations/global/workloadIdentityPools/github-actions-pool/providers/github-oidc-v2"
           service_account: "github-actions-deployer@ecotech-tw.iam.gserviceaccount.com"
 
-      - name: Docker Auth
-        uses: docker/login-action@v3
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
         with:
-          username: "oauth2access"
-          password: "${{ steps.auth.outputs.access_token }}"
-          registry: "asia-east1-docker.pkg.dev"
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Docker Auth
+        run: |
+          gcloud auth configure-docker asia-east1-docker.pkg.dev --quiet
 
       - name: Build and Push Container
         run: |

@@ -28,7 +28,7 @@ The deployment defaults are set to:
 - Artifact Registry repository: `eco-tech-website`
 - Cloud Run service: `eco-tech-website`
 - Cloud Run region: `asia-east1`
-- Image name: `eco-tech-website`
+- Image name: `website-image`
 
 ## WIF configuration
 
@@ -42,7 +42,7 @@ The workflow uses Google Workload Identity Federation with:
 When a new commit lands on `main`, GitHub Actions will:
 
 1. Authenticate to Google Cloud via WIF
-2. Build the Docker image
+2. Configure Docker auth via `gcloud auth configure-docker`
 3. Push the image to Artifact Registry
 4. Deploy the image to Cloud Run
 
