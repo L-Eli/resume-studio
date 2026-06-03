@@ -56,6 +56,7 @@ export const homeDictionaries = {
     hero: {
       badge: "WorldSkills Champion Excellence",
       heading: {
+        presentation: "default",
         beforeAccent: "Design & Develop",
         accent: "AI & IT",
         afterAccent: "Solutions for Every Industry",
@@ -287,6 +288,7 @@ export const homeDictionaries = {
     hero: {
       badge: "WorldSkills 冠軍級專業",
       heading: {
+        presentation: "compact",
         beforeAccent: "設計與開發",
         accent: "AI 與 IT",
         afterAccent: "解決方案，服務每個產業",

@@ -20,6 +20,8 @@ test("i18n exposes English default and Traditional Chinese homepage copy", () =>
   assert.equal(chinese.locale, "zh")
   assert.equal(english.htmlLang, "en")
   assert.equal(chinese.htmlLang, "zh-Hant")
+  assert.equal(english.hero.heading.presentation, "default")
+  assert.equal(chinese.hero.heading.presentation, "compact")
 
   assert.equal(english.navigation.items[0]?.label, "Home")
   assert.equal(chinese.navigation.items[0]?.label, "首頁")

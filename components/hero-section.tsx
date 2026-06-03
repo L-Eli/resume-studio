@@ -45,6 +45,11 @@ type HeroSectionProps = {
 
 export function HeroSection({ content, locale }: HeroSectionProps) {
   const ref = useRef(null)
+  const isCompactHeading = content.heading.presentation === "compact"
+  const headingClassName = isCompactHeading
+    ? "mx-auto max-w-5xl text-4xl md:text-5xl lg:text-6xl font-bold tracking-normal leading-[1.08] mb-6 text-balance"
+    : "text-4xl md:text-6xl lg:text-7xl font-bold tracking-normal leading-tight mb-6 text-balance"
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -112,7 +117,7 @@ export function HeroSection({ content, locale }: HeroSectionProps) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2, duration: 0.8 }}
-          className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-balance"
+          className={headingClassName}
         >
           {content.heading.beforeAccent}{" "}
           <span className="relative">
