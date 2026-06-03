@@ -4,6 +4,7 @@ import { useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getLocalizedHref, type HomeContent, type Locale } from "@/lib/i18n"
 
 type Floater = {
   width: number
@@ -37,7 +38,12 @@ const FLOATERS: Floater[] = Array.from({ length: 8 }, (_, i) => {
   return { width, height, left, top, alpha, duration }
 })
 
-export function HeroSection() {
+type HeroSectionProps = {
+  content: HomeContent["hero"]
+  locale: Locale
+}
+
+export function HeroSection({ content, locale }: HeroSectionProps) {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -98,9 +104,7 @@ export function HeroSection() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border mb-8"
         >
           <Sparkles className="w-4 h-4 text-accent" />
-          <span className="text-sm text-muted-foreground">
-            WorldSkills Champion Excellence
-          </span>
+          <span className="text-sm text-muted-foreground">{content.badge}</span>
         </motion.div>
 
         {/* Heading */}
@@ -110,9 +114,9 @@ export function HeroSection() {
           transition={{ delay: 2, duration: 0.8 }}
           className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-balance"
         >
-          Design & Develop{" "}
+          {content.heading.beforeAccent}{" "}
           <span className="relative">
-            <span className="text-accent">AI & IT</span>
+            <span className="text-accent">{content.heading.accent}</span>
             <motion.span
               className="absolute -bottom-2 left-0 w-full h-1 bg-accent/50 rounded-full"
               initial={{ scaleX: 0 }}
@@ -121,7 +125,7 @@ export function HeroSection() {
             />
           </span>
           <br />
-          Solutions for Every Industry
+          {content.heading.afterAccent}
         </motion.h1>
 
         {/* Subtitle */}
@@ -131,8 +135,7 @@ export function HeroSection() {
           transition={{ delay: 2.3, duration: 0.6 }}
           className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 text-pretty"
         >
-          ECO Tech transforms businesses with cutting-edge artificial intelligence 
-          and innovative technology solutions. We build the future, one solution at a time.
+          {content.subtitle}
         </motion.p>
 
         {/* CTA Buttons */}
@@ -145,12 +148,20 @@ export function HeroSection() {
           <Button
             size="lg"
             className="bg-foreground text-background hover:bg-foreground/90 group"
+            asChild
           >
-            Start Building
-            <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+            <a href={getLocalizedHref(locale, "#contact")}>
+              {content.primaryCta}
+              <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </a>
           </Button>
-          <Button size="lg" variant="outline" className="border-border hover:bg-secondary bg-transparent">
-            View Our Work
+          <Button
+            size="lg"
+            variant="outline"
+            className="border-border hover:bg-secondary bg-transparent"
+            asChild
+          >
+            <a href={getLocalizedHref(locale, "#services")}>{content.secondaryCta}</a>
           </Button>
         </motion.div>
 
@@ -161,11 +172,7 @@ export function HeroSection() {
           transition={{ delay: 2.8, duration: 0.6 }}
           className="grid grid-cols-3 gap-8 mt-20 pt-10 border-t border-border/50"
         >
-          {[
-            { value: "1+", label: "Year of Innovation" },
-            { value: "10+", label: "Projects Delivered" },
-            { value: "100%", label: "Client Satisfaction" },
-          ].map((stat, index) => (
+          {content.stats.map((stat, index) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}

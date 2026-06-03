@@ -1,19 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useEffect, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getLocalizedHref, type HomeContent, type Locale } from "@/lib/i18n"
 
-const navItems = [
-  { name: "Home", href: "#home" },
-  { name: "Services", href: "#services" },
-  { name: "About", href: "#about" },
-  { name: "Partners", href: "#partners" },
-  { name: "Contact", href: "#contact" },
-]
+type NavigationProps = {
+  content: HomeContent["navigation"]
+  locale: Locale
+}
 
-export function Navigation() {
+export function Navigation({ content, locale }: NavigationProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -36,53 +34,60 @@ export function Navigation() {
     >
       <nav className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <motion.a
-            href="#home"
+            href={getLocalizedHref(locale, "#home")}
             className="text-2xl font-bold tracking-tight"
             whileHover={{ scale: 1.02 }}
           >
             ECO<span className="text-accent">Tech</span>
           </motion.a>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {navItems.map((item, index) => (
+            {content.items.map((item, index) => (
               <motion.a
-                key={item.name}
-                href={item.href}
+                key={item.label}
+                href={getLocalizedHref(locale, item.href)}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.7 + index * 0.1 }}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
               >
-                {item.name}
+                {item.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
               </motion.a>
             ))}
-            <motion.div
+            <motion.a
+              href={content.alternateHref}
+              hrefLang={content.alternateLocale === "zh" ? "zh-Hant" : "en"}
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 2.2 }}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Button className="bg-foreground text-background hover:bg-foreground/90">
-                Get Started
+              {content.languageLabel}
+            </motion.a>
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.3 }}
+            >
+              <Button className="bg-foreground text-background hover:bg-foreground/90" asChild>
+                <a href={getLocalizedHref(locale, "#contact")}>{content.cta}</a>
               </Button>
             </motion.div>
           </div>
 
-          {/* Mobile Menu Button */}
           <Button
             variant="ghost"
             size="icon"
             className="md:hidden"
+            aria-label="Toggle navigation"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
         </div>
 
-        {/* Mobile Navigation */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -92,18 +97,31 @@ export function Navigation() {
               className="md:hidden overflow-hidden"
             >
               <div className="py-4 space-y-4">
-                {navItems.map((item) => (
+                {content.items.map((item) => (
                   <a
-                    key={item.name}
-                    href={item.href}
+                    key={item.label}
+                    href={getLocalizedHref(locale, item.href)}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="block text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {item.name}
+                    {item.label}
                   </a>
                 ))}
-                <Button className="w-full bg-foreground text-background hover:bg-foreground/90">
-                  Get Started
+                <a
+                  href={content.alternateHref}
+                  hrefLang={content.alternateLocale === "zh" ? "zh-Hant" : "en"}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {content.languageLabel}
+                </a>
+                <Button className="w-full bg-foreground text-background hover:bg-foreground/90" asChild>
+                  <a
+                    href={getLocalizedHref(locale, "#contact")}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {content.cta}
+                  </a>
                 </Button>
               </div>
             </motion.div>

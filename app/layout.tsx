@@ -2,21 +2,23 @@ import React from "react"
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { defaultLocale, getHomeMetadata } from '@/lib/i18n'
 import './globals.css'
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const defaultMetadata = getHomeMetadata(defaultLocale)
 
 export const metadata: Metadata = {
-  title: 'ECO Tech | AI & IT Solutions for Every Industry',
-  description: 'ECO Tech designs and develops cutting-edge AI & IT solutions for businesses across all industries. WorldSkills Champion expertise driving innovation.',
-  keywords: ['AI solutions', 'IT consulting', 'software development', 'digital transformation', 'machine learning', 'enterprise solutions'],
+  ...defaultMetadata,
   authors: [{ name: 'ECO Tech' }],
-  openGraph: {
-    title: 'ECO Tech | AI & IT Solutions',
-    description: 'Transforming businesses with innovative AI & IT solutions',
-    type: 'website',
+  alternates: {
+    canonical: '/',
+    languages: {
+      en: '/',
+      zh: '/zh',
+    },
   },
-    generator: 'v0.app'
+  generator: 'v0.app',
 }
 
 export default function RootLayout({

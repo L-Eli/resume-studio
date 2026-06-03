@@ -2,13 +2,18 @@
 
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import type { HomeContent } from "@/lib/i18n"
 
 type ParticlePosition = {
   x: number
   y: number
 }
 
-export function LoadingScreen() {
+type LoadingScreenProps = {
+  content: HomeContent["loading"]
+}
+
+export function LoadingScreen({ content }: LoadingScreenProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [progress, setProgress] = useState(0)
   const [isMounted, setIsMounted] = useState(false)
@@ -104,7 +109,7 @@ export function LoadingScreen() {
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             >
-              Initializing...
+              {content.status}
             </motion.p>
           </motion.div>
 

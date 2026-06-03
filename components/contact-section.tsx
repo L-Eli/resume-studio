@@ -1,16 +1,26 @@
 "use client"
 
-import React from "react"
-
+import type React from "react"
 import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
-import { Send, Mail, MapPin, ArrowRight } from "lucide-react"
+import { ArrowRight, Mail, MapPin, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { contactFormSchema, type ContactFormValues } from "@/lib/contact"
+import type { HomeContent } from "@/lib/i18n"
 
-export function ContactSection() {
+type ContactSectionProps = {
+  content: HomeContent["contact"]
+}
+
+function localizeContactError(content: HomeContent["contact"], message: string) {
+  const validationMessages = content.form.validationMessages as Record<string, string>
+
+  return validationMessages[message] ?? message
+}
+
+export function ContactSection({ content }: ContactSectionProps) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -28,6 +38,7 @@ export function ContactSection() {
     text: string
   }>({ kind: "idle", text: "" })
 
+  const form = content.form
   const errorTextClass = "text-[lab(56.21_94.47_98.89_/_0.98)]"
   const errorBorderClass = "aria-invalid:border-[color:lab(56.21_94.47_98.89_/_0.98)]"
   const errorFocusRingClass = "aria-invalid:focus-visible:ring-[color:lab(56.21_94.47_98.89_/_0.35)] aria-invalid:focus-visible:border-[color:lab(56.21_94.47_98.89_/_0.98)]"
@@ -48,7 +59,7 @@ export function ContactSection() {
       const key = issue.path[0]
       if (typeof key !== "string") continue
       if (key in nextErrors) continue
-      nextErrors[key as keyof ContactFormValues] = issue.message
+      nextErrors[key as keyof ContactFormValues] = localizeContactError(content, issue.message)
     }
 
     return { ok: false as const, errors: nextErrors }
@@ -56,7 +67,9 @@ export function ContactSection() {
 
   const validateField = (field: keyof ContactFormValues, value: string) => {
     const parsed = fieldSchemas[field].safeParse(value)
-    return parsed.success ? "" : parsed.error.issues[0]?.message || "Invalid"
+    const message = parsed.success ? "" : parsed.error.issues[0]?.message || "Invalid"
+
+    return message ? localizeContactError(content, message) : ""
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,7 +80,7 @@ export function ContactSection() {
     const validation = validateAll(values)
     if (!validation.ok) {
       setErrors(validation.errors)
-      setSubmitMessage({ kind: "error", text: "Please fix the highlighted fields." })
+      setSubmitMessage({ kind: "error", text: form.messages.fixFields })
       return
     }
 
@@ -92,20 +105,20 @@ export function ContactSection() {
         const nextErrors: Partial<Record<keyof ContactFormValues, string>> = {}
         for (const [k, v] of Object.entries(fieldErrors)) {
           if (k === "name" || k === "email" || k === "company" || k === "message") {
-            nextErrors[k] = v
+            nextErrors[k] = localizeContactError(content, v)
           }
         }
 
         if (Object.keys(nextErrors).length) setErrors(nextErrors)
-        setSubmitMessage({ kind: "error", text: "Something went wrong. Please try again." })
+        setSubmitMessage({ kind: "error", text: form.messages.failed })
         return
       }
 
       setErrors({})
       setValues({ name: "", email: "", company: "", message: "" })
-      setSubmitMessage({ kind: "success", text: "Message sent. We will get back to you soon." })
+      setSubmitMessage({ kind: "success", text: form.messages.success })
     } catch {
-      setSubmitMessage({ kind: "error", text: "Network error. Please try again." })
+      setSubmitMessage({ kind: "error", text: form.messages.network })
     } finally {
       setIsSubmitting(false)
     }
@@ -113,27 +126,23 @@ export function ContactSection() {
 
   return (
     <section id="contact" className="py-32 relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(45,212,191,0.05)_0%,transparent_50%)]" />
-      
+
       <div ref={ref} className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16">
-          {/* Left Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8 }}
           >
-            <span className="text-sm text-accent uppercase tracking-widest">Contact Us</span>
+            <span className="text-sm text-accent uppercase tracking-widest">{content.eyebrow}</span>
             <h2 className="text-3xl md:text-5xl font-bold mt-4 mb-6 text-balance">
-              Let{"'"}s Build Something Amazing Together
+              {content.title}
             </h2>
             <p className="text-muted-foreground mb-10 text-pretty">
-              Ready to transform your business with AI and IT solutions? 
-              Get in touch with our team to discuss your project.
+              {content.description}
             </p>
 
-            {/* Contact Info */}
             <div className="space-y-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -145,7 +154,7 @@ export function ContactSection() {
                   <Mail className="w-5 h-5 text-accent" />
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">Email</div>
+                  <div className="text-sm text-muted-foreground">{content.emailLabel}</div>
                   <div className="font-medium">service@ecotech.tw</div>
                 </div>
               </motion.div>
@@ -160,20 +169,19 @@ export function ContactSection() {
                   <MapPin className="w-5 h-5 text-accent" />
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">Location</div>
-                  <div className="font-medium">Taiwan & Worldwide</div>
+                  <div className="text-sm text-muted-foreground">{content.locationLabel}</div>
+                  <div className="font-medium">{content.locationValue}</div>
                 </div>
               </motion.div>
             </div>
 
-            {/* Social Links Placeholder */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.4 }}
               className="mt-10 pt-10 border-t border-border"
             >
-              <p className="text-sm text-muted-foreground mb-4">Follow Us</p>
+              <p className="text-sm text-muted-foreground mb-4">{content.followLabel}</p>
               <div className="flex gap-4">
                 <motion.a
                   href="https://github.com/ecotech-tw"
@@ -188,7 +196,6 @@ export function ContactSection() {
             </motion.div>
           </motion.div>
 
-          {/* Right Content - Form */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -198,19 +205,19 @@ export function ContactSection() {
               onSubmit={handleSubmit}
               className="p-8 rounded-2xl bg-card border border-border"
             >
-              <h3 className="text-xl font-semibold mb-6">Send us a message</h3>
-              
+              <h3 className="text-xl font-semibold mb-6">{form.title}</h3>
+
               <div className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className="text-sm text-muted-foreground mb-2 block">
-                      Name
+                      {form.labels.name}
                     </label>
                     <Input
                       id="name"
                       name="name"
                       autoComplete="name"
-                      placeholder="Your name"
+                      placeholder={form.placeholders.name}
                       className={`bg-secondary border-border ${errorBorderClass} ${errorFocusRingClass}`}
                       value={values.name}
                       aria-invalid={Boolean(errors.name)}
@@ -234,14 +241,14 @@ export function ContactSection() {
                   </div>
                   <div>
                     <label htmlFor="email" className="text-sm text-muted-foreground mb-2 block">
-                      Email
+                      {form.labels.email}
                     </label>
                     <Input
                       id="email"
                       name="email"
                       type="email"
                       autoComplete="email"
-                      placeholder="your@email.com"
+                      placeholder={form.placeholders.email}
                       className={`bg-secondary border-border ${errorBorderClass} ${errorFocusRingClass}`}
                       value={values.email}
                       aria-invalid={Boolean(errors.email)}
@@ -267,13 +274,13 @@ export function ContactSection() {
 
                 <div>
                   <label htmlFor="company" className="text-sm text-muted-foreground mb-2 block">
-                    Company
+                    {form.labels.company}
                   </label>
                   <Input
                     id="company"
                     name="company"
                     autoComplete="organization"
-                    placeholder="Your company"
+                    placeholder={form.placeholders.company}
                     className={`bg-secondary border-border ${errorBorderClass} ${errorFocusRingClass}`}
                     value={values.company || ""}
                     aria-invalid={Boolean(errors.company)}
@@ -298,12 +305,12 @@ export function ContactSection() {
 
                 <div>
                   <label htmlFor="message" className="text-sm text-muted-foreground mb-2 block">
-                    Message
+                    {form.labels.message}
                   </label>
                   <Textarea
                     id="message"
                     name="message"
-                    placeholder="Tell us about your project..."
+                    placeholder={form.placeholders.message}
                     rows={5}
                     className={`bg-secondary border-border resize-none ${errorBorderClass} ${errorFocusRingClass}`}
                     value={values.message}
@@ -341,7 +348,7 @@ export function ContactSection() {
                     </motion.div>
                   ) : (
                     <>
-                      Send Message
+                      {form.submit}
                       <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </>
                   )}
