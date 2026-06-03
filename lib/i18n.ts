@@ -277,7 +277,7 @@ export const homeDictionaries = {
       cta: "開始合作",
       languageLabel: "English",
       alternateLocale: "en",
-      alternateHref: "/",
+      alternateHref: "/?lang=en",
       items: [
         { label: "首頁", href: "#home" },
         { label: "服務", href: "#services" },

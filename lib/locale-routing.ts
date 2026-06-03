@@ -4,6 +4,8 @@ type LanguagePreference = {
   order: number
 }
 
+export const localePreferenceCookie = "eco-locale"
+
 function parseAcceptLanguage(acceptLanguage: string | null): LanguagePreference[] {
   if (!acceptLanguage) return []
 
@@ -34,6 +36,10 @@ export function prefersChineseLanguage(acceptLanguage: string | null) {
   return topPreference ? isChineseLanguageTag(topPreference.tag) : false
 }
 
-export function shouldRedirectToChinese(pathname: string, acceptLanguage: string | null) {
-  return pathname === "/" && prefersChineseLanguage(acceptLanguage)
+export function shouldRedirectToChinese(
+  pathname: string,
+  acceptLanguage: string | null,
+  explicitLocale?: string,
+) {
+  return pathname === "/" && explicitLocale !== "en" && prefersChineseLanguage(acceptLanguage)
 }

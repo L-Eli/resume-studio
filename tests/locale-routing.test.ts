@@ -14,3 +14,7 @@ test("does not redirect non-root paths or non-Chinese browser languages", () => 
   assert.equal(shouldRedirectToChinese("/", "en-US,en;q=0.9"), false)
   assert.equal(shouldRedirectToChinese("/", null), false)
 })
+
+test("does not redirect Chinese browser languages after an explicit English preference", () => {
+  assert.equal(shouldRedirectToChinese("/", "zh-TW,zh;q=0.9,en-US;q=0.8", "en"), false)
+})
