@@ -1,7 +1,15 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
+import { shouldRedirectToChinese } from "@/lib/locale-routing"
+
 export function proxy(request: NextRequest) {
+  if (shouldRedirectToChinese(request.nextUrl.pathname, request.headers.get("accept-language"))) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/zh"
+    return NextResponse.redirect(url)
+  }
+
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set("x-pathname", request.nextUrl.pathname)
 

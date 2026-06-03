@@ -2,6 +2,10 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 
 import { contactFormSchema } from "@/lib/contact"
+import {
+  getSheetsQuotaProjectForTokenSource,
+  type SheetsTokenSource,
+} from "@/lib/google-sheets"
 
 export const runtime = "nodejs"
 
@@ -236,7 +240,9 @@ export async function POST(req: Request) {
   }
 
   if (spreadsheetId) {
-    const rawBearerToken = sheetsBearerToken || (await getCloudRunServiceAccountToken())
+    const envBearerToken = sheetsBearerToken?.trim()
+    const tokenSource: SheetsTokenSource = envBearerToken ? "env" : "metadata"
+    const rawBearerToken = envBearerToken || (await getCloudRunServiceAccountToken())
     const bearerToken = rawBearerToken ? normalizeAccessToken(rawBearerToken) : null
 
     if (!bearerToken) {
@@ -244,15 +250,17 @@ export async function POST(req: Request) {
         ok: false,
         error: "server_misconfigured",
         message:
-          "Set GOOGLE_SHEETS_BEARER_TOKEN for local testing, or run on Cloud Run with a service account that can call Sheets API",
+        "Set GOOGLE_SHEETS_BEARER_TOKEN for local testing, or run on Cloud Run with a service account that can call Sheets API",
       })
     }
+
+    const sheetsQuotaProject = getSheetsQuotaProjectForTokenSource(tokenSource, quotaProject)
 
     const upstream = await appendViaSheetsApi(
       spreadsheetId,
       spreadsheetRange,
       bearerToken,
-      quotaProject,
+      sheetsQuotaProject,
       payload,
     )
     if (!upstream.ok) {
