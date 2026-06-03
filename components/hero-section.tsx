@@ -46,6 +46,7 @@ type HeroSectionProps = {
 export function HeroSection({ content, locale }: HeroSectionProps) {
   const ref = useRef(null)
   const isCompactHeading = content.heading.presentation === "compact"
+  const showAccentUnderline = content.heading.showAccentUnderline
   const headingClassName = isCompactHeading
     ? "mx-auto max-w-5xl text-4xl md:text-5xl lg:text-6xl font-bold tracking-normal leading-[1.08] mb-6 text-balance"
     : "text-4xl md:text-6xl lg:text-7xl font-bold tracking-normal leading-tight mb-6 text-balance"
@@ -122,12 +123,14 @@ export function HeroSection({ content, locale }: HeroSectionProps) {
           {content.heading.beforeAccent}{" "}
           <span className="relative">
             <span className="text-accent">{content.heading.accent}</span>
-            <motion.span
-              className="absolute -bottom-2 left-0 w-full h-1 bg-accent/50 rounded-full"
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ delay: 2.5, duration: 0.8 }}
-            />
+            {showAccentUnderline ? (
+              <motion.span
+                className="absolute -bottom-2 left-0 w-full h-1 bg-accent/50 rounded-full"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 2.5, duration: 0.8 }}
+              />
+            ) : null}
           </span>
           <br />
           {content.heading.afterAccent}
