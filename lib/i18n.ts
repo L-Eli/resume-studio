@@ -154,7 +154,7 @@ export const homeDictionaries = {
         { name: "WorldSkills Asia", subtitle: "Expert" },
         { name: "APMIC", subtitle: "Partner" },
         { name: "Ministry of Labor", subtitle: "Republic of China" },
-        { name: "hestechs", subtitle: "Technology Partner" },
+        { name: "HES Technology", subtitle: "Technology Partner" },
       ],
       credentials: [
         "WorldSkills Champion",
@@ -375,7 +375,7 @@ export const homeDictionaries = {
         { name: "WorldSkills Asia", subtitle: "專家" },
         { name: "APMIC", subtitle: "合作夥伴" },
         { name: "Ministry of Labor", subtitle: "中華民國" },
-        { name: "hestechs", subtitle: "技術合作夥伴" },
+        { name: "HES Technology", subtitle: "技術合作夥伴" },
       ],
       credentials: [
         "WorldSkills 冠軍",
