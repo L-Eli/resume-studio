@@ -284,6 +284,7 @@ export function ResumeStudio() {
   const [savedAt, setSavedAt] = useState<string | null>(null)
   const [notice, setNotice] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const previewStageRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const raw = window.localStorage.getItem("eli-resume-studio-v1")
@@ -309,6 +310,10 @@ export function ResumeStudio() {
     }, 500)
     return () => window.clearTimeout(timeout)
   }, [resume, template])
+
+  useEffect(() => {
+    previewStageRef.current?.scrollTo({ top: 0, behavior: "auto" })
+  }, [activePage])
 
   const activeTemplate = useMemo(() => templateOptions.find((item) => item.id === template) ?? templateOptions[0], [template])
 
@@ -407,7 +412,20 @@ export function ResumeStudio() {
             <p>改動左側內容，右側預覽會即時同步。完成後可直接列印成 PDF，或把 JSON 帶到另一台裝置繼續編輯。</p>
           </div>
 
-          <section className="editor-card">
+          <nav className="editor-quick-nav" aria-label="快速導覽">
+            <p>快速導覽</p>
+            <div>
+              <button type="button" onClick={() => document.getElementById("editor-identity")?.scrollIntoView({ behavior: "smooth", block: "start" })}>個人資訊</button>
+              <button type="button" onClick={() => document.getElementById("editor-positioning")?.scrollIntoView({ behavior: "smooth", block: "start" })}>摘要與能力</button>
+              <button type="button" onClick={() => document.getElementById("editor-experience")?.scrollIntoView({ behavior: "smooth", block: "start" })}>專業經歷</button>
+              <button type="button" onClick={() => document.getElementById("editor-leadership")?.scrollIntoView({ behavior: "smooth", block: "start" })}>領導與社群</button>
+              <button type="button" onClick={() => document.getElementById("editor-proof")?.scrollIntoView({ behavior: "smooth", block: "start" })}>獎項與成就</button>
+              <button type="button" onClick={() => document.getElementById("editor-foundation")?.scrollIntoView({ behavior: "smooth", block: "start" })}>學歷與技術</button>
+              <button type="button" onClick={() => document.getElementById("editor-templates")?.scrollIntoView({ behavior: "smooth", block: "start" })}>模板</button>
+            </div>
+          </nav>
+
+          <section id="editor-identity" className="editor-card">
             <SectionTitle icon={Sparkles} eyebrow="01 / Identity" title="個人資訊" />
             <div className="field-grid">
               <Field label="姓名" value={resume.personal.name} onChange={(value) => updatePersonal("name", value)} />
@@ -418,11 +436,11 @@ export function ResumeStudio() {
               <Field label="Email" value={resume.personal.email} onChange={(value) => updatePersonal("email", value)} />
               <Field label="LinkedIn" value={resume.personal.linkedin} onChange={(value) => updatePersonal("linkedin", value)} />
               <Field label="網站（選填）" value={resume.personal.website} onChange={(value) => updatePersonal("website", value)} />
-              <Field label="Availability 標籤" value={resume.personal.availability} onChange={(value) => updatePersonal("availability", value)} multiline />
+              <Field label="Availability 標籤" value={resume.personal.availability} onChange={(value) => updatePersonal("availability", value)} />
             </div>
           </section>
 
-          <section className="editor-card">
+          <section id="editor-positioning" className="editor-card">
             <SectionTitle icon={Sparkles} eyebrow="02 / Positioning" title="摘要與核心能力" />
             <Field label="Executive summary" value={resume.summary} onChange={(value) => setResume((current) => ({ ...current, summary: value }))} multiline />
             <div className="chip-editor">
@@ -441,7 +459,7 @@ export function ResumeStudio() {
             </div>
           </section>
 
-          <section className="editor-card">
+          <section id="editor-experience" className="editor-card">
             <div className="section-heading-row"><SectionTitle icon={BriefcaseBusiness} eyebrow="03 / Experience" title="專業經歷" /><button className="icon-button" aria-label="新增專業經歷" onClick={addExperience}><Plus size={17} /></button></div>
             <div className="repeat-list">
               {resume.experiences.map((experience, index) => (
@@ -458,7 +476,7 @@ export function ResumeStudio() {
             </div>
           </section>
 
-          <section className="editor-card">
+          <section id="editor-leadership" className="editor-card">
             <div className="section-heading-row"><SectionTitle icon={Award} eyebrow="04 / Leadership" title="領導與社群" /><button className="icon-button" aria-label="新增領導經歷" onClick={addLeadership}><Plus size={17} /></button></div>
             <div className="repeat-list">
               {resume.leadership.map((item) => (
@@ -475,7 +493,7 @@ export function ResumeStudio() {
             </div>
           </section>
 
-          <section className="editor-card">
+          <section id="editor-proof" className="editor-card">
             <div className="section-heading-row"><SectionTitle icon={Award} eyebrow="05 / Proof" title="獎項與成就" /><button className="icon-button" aria-label="新增獎項" onClick={addAward}><Plus size={17} /></button></div>
             <div className="repeat-list compact-repeat-list">
               {resume.awards.map((item) => (
@@ -487,7 +505,7 @@ export function ResumeStudio() {
             </div>
           </section>
 
-          <section className="editor-card">
+          <section id="editor-foundation" className="editor-card">
             <div className="section-heading-row"><SectionTitle icon={GraduationCap} eyebrow="06 / Foundation" title="學歷與技術基礎" /><button className="icon-button" aria-label="新增學歷" onClick={addEducation}><Plus size={17} /></button></div>
             <div className="repeat-list compact-repeat-list">
               {resume.education.map((item) => (
@@ -503,7 +521,7 @@ export function ResumeStudio() {
             </div>
           </section>
 
-          <section className="editor-card template-card">
+          <section id="editor-templates" className="editor-card template-card">
             <SectionTitle icon={LayoutTemplate} eyebrow="07 / Visual system" title="選擇內建模板" />
             <div className="template-grid">
               {templateOptions.map((option) => <button key={option.id} className={`template-option ${template === option.id ? "selected" : ""}`} onClick={() => setTemplate(option.id)}><div className={`template-swatch swatch-${option.id}`}><span /><span /><span /></div><div className="template-option-copy"><strong>{option.name}</strong><small>{option.description}</small></div>{template === option.id && <Check size={16} className="template-check" />}</button>)}
@@ -523,7 +541,7 @@ export function ResumeStudio() {
               <div className="preview-meta"><span>A4 / print-ready</span><span>Last saved {savedAt ? new Date(savedAt).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" }) : "—"}</span></div>
             </div>
           </div>
-          <div className="preview-stage">
+          <div ref={previewStageRef} className="preview-stage">
             {[0, 1].map((page) => <div className={`preview-page ${activePage === page ? "is-active" : ""}`} key={page}><ResumePaper resume={resume} template={template} page={page} pageCount={2} /></div>)}
           </div>
           <div className="preview-hint"><div className="hint-icon"><Printer size={15} /></div><p><strong>要存成 PDF？</strong> 按右上角「下載 PDF」，在列印視窗選擇「另存為 PDF」。目前頁面已針對 A4 與列印色彩最佳化。</p></div>
