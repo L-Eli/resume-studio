@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "next build --webpack",
     "dev": "next dev",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
@@ -66,12 +66,14 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@tailwindcss/oxide-win32-arm64-msvc": "4.3.3",
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.1",
+    "lightningcss-win32-arm64-msvc": "1.32.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "tsx": "^4.21.0",
