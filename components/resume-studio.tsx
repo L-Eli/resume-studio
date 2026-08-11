@@ -527,7 +527,7 @@ function ResumePaper({ resume, template }: { resume: ResumeData; template: Templ
     <article className={`resume-paper paper-${template}`}>
       <header className="resume-paper-header">
         <div className="resume-kicker">AI PRODUCT / ENTERPRISE SYSTEMS / WEB TECHNOLOGIES</div>
-        <div className="resume-name-row"><div><h1>{personal.name}</h1><p className="resume-short-name">{personal.shortName ? `“${personal.shortName}”` : ""}</p></div><span className="availability-pill">{personal.availability || "Open to meaningful work"}</span></div>
+        <div className="resume-name-row"><div className="resume-name-line"><h1>{personal.name}</h1><p className="resume-short-name">{personal.shortName ? `“${personal.shortName}”` : ""}</p></div><span className="availability-pill">{personal.availability || "Open to meaningful work"}</span></div>
         <p className="resume-headline">{personal.headline}</p>
         <div className="resume-contact-row">
           {personal.location && <span>{personal.location}</span>}
