@@ -112,6 +112,24 @@ a { color: inherit; }
   .studio-header { gap: 10px; }.header-actions .button-primary { padding: 0 9px; }.field-grid { grid-template-columns: 1fr; }.field-wide { grid-column: auto; }.compact-grid .field-wide { grid-column: auto; }.technical-row { grid-template-columns: 1fr; }.resume-side-column { grid-template-columns: 1fr; }.resume-contact-row { display: grid; gap: 6px; }.resume-contact-row span::after, .resume-contact-row a::after { display: none; }.resume-section { margin-bottom: 21px; }.resume-paper { padding-left: 19px; padding-right: 19px; }.resume-experience-heading { display: block; }.resume-experience-heading time { display: block; margin-top: 4px; }.preview-hint { align-items: start; }
 }
 
+/* Keep the paper preview in the same A4 geometry as the printed document. */
+@media (max-width: 800px) {
+  .preview-stage { justify-content: flex-start; }
+  .resume-paper { width: 210mm; max-width: none; min-height: 297mm; padding: 17mm 17mm 12mm; }
+  .resume-name-row { display: flex; }
+  .resume-name-row h1 { font-size: clamp(40px, 4.7vw, 64px); }
+  .availability-pill { margin-top: 0; display: block; max-width: 185px; text-align: right; }
+  .resume-headline { font-size: 15px; }
+  .resume-contact-row { display: flex; gap: 8px 16px; }
+  .resume-paper-body { grid-template-columns: minmax(0, 1.55fr) minmax(155px, .7fr); column-gap: 27px; row-gap: 0; }
+  .resume-side-column { display: block; }
+  .resume-side-column .resume-section, .resume-main-column .resume-section { margin-bottom: 23px; }
+  .leadership-grid { grid-template-columns: 1fr 1fr; }
+  .resume-paper-footer { margin-top: auto; }
+  .resume-experience-heading { display: flex; }
+  .resume-experience-heading time { display: inline; margin-top: 0; }
+}
+
 @media print {
   @page { size: A4; margin: 0; }
   html, body { background: #fff !important; }
