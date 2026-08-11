@@ -72,7 +72,7 @@ type ResumeData = {
 
 type TemplateId = "signal" | "editorial" | "mono"
 
-const RESUME_PAGE_COUNT = 3
+const RESUME_PAGE_COUNT = 4
 
 const starterResume: ResumeData = {
   personal: {
@@ -408,12 +408,6 @@ export function ResumeStudio() {
 
       <div className="studio-layout">
         <aside className={`editor-panel ${activeView === "preview" ? "mobile-hidden" : ""}`}>
-          <div className="editor-intro">
-            <p className="eyebrow">編輯器</p>
-            <h2>讓經歷變成一頁有方向的故事。</h2>
-            <p>改動左側內容，右側預覽會即時同步。完成後可直接列印成 PDF，或把 JSON 帶到另一台裝置繼續編輯。</p>
-          </div>
-
           <nav className="editor-quick-nav" aria-label="快速導覽">
             <p>快速導覽</p>
             <div>
@@ -426,6 +420,12 @@ export function ResumeStudio() {
               <button type="button" onClick={() => document.getElementById("editor-templates")?.scrollIntoView({ behavior: "smooth", block: "start" })}>模板</button>
             </div>
           </nav>
+
+          <div className="editor-intro">
+            <p className="eyebrow">編輯器</p>
+            <h2>讓經歷變成一頁有方向的故事。</h2>
+            <p>改動左側內容，右側預覽會即時同步。完成後可直接列印成 PDF，或把 JSON 帶到另一台裝置繼續編輯。</p>
+          </div>
 
           <section id="editor-identity" className="editor-card">
             <SectionTitle icon={Sparkles} eyebrow="01 / Identity" title="個人資訊" />
@@ -549,6 +549,9 @@ export function ResumeStudio() {
           <div className="preview-hint"><div className="hint-icon"><Printer size={15} /></div><p><strong>要存成 PDF？</strong> 按右上角「下載 PDF」，在列印視窗選擇「另存為 PDF」。目前頁面已針對 A4 與列印色彩最佳化。</p></div>
         </section>
       </div>
+      <div className="print-resume" aria-hidden="true">
+        {Array.from({ length: RESUME_PAGE_COUNT }, (_, page) => <div className="print-page" key={page}><ResumePaper resume={resume} template={template} page={page} pageCount={RESUME_PAGE_COUNT} /></div>)}
+      </div>
       {notice && <div className="toast"><Check size={15} /> {notice}</div>}
     </main>
   )
@@ -557,7 +560,12 @@ export function ResumeStudio() {
 function ResumePaper({ resume, template, page, pageCount }: { resume: ResumeData; template: TemplateId; page: number; pageCount: number }) {
   const { personal } = resume
   const isOverview = page === 0
-  const experiences = page === 0 ? resume.experiences.slice(0, 1) : page === 1 ? resume.experiences.slice(1, 3) : resume.experiences.slice(3)
+  const firstExperience = resume.experiences[0]
+  const firstPageExperience = firstExperience ? [{ ...firstExperience, bullets: firstExperience.bullets.slice(0, 3) }] : []
+  const secondPageExperiences = firstExperience && firstExperience.bullets.length > 3
+    ? [{ ...firstExperience, bullets: firstExperience.bullets.slice(3) }, ...resume.experiences.slice(1, 2)]
+    : resume.experiences.slice(1, 2)
+  const experiences = page === 0 ? firstPageExperience : page === 1 ? secondPageExperiences : page === 2 ? resume.experiences.slice(2, 4) : resume.experiences.slice(4)
   return (
     <article className={`resume-paper paper-${template} ${isOverview ? "resume-page-overview" : "resume-page-continuation"}`}>
       {isOverview ? (
@@ -583,13 +591,13 @@ function ResumePaper({ resume, template, page, pageCount }: { resume: ResumeData
           <ResumeSection title="Professional experience">
             {experiences.map((experience) => <ResumeExperience key={experience.id} experience={experience} />)}
           </ResumeSection>
-          {!isOverview && resume.leadership.length > 0 && <ResumeSection title="Technical leadership"><div className="leadership-grid">{resume.leadership.map((item) => <ResumeExperience key={item.id} experience={item} compact />)}</div></ResumeSection>}
+          {page === 3 && resume.leadership.length > 0 && <ResumeSection title="Technical leadership"><div className="leadership-grid">{resume.leadership.map((item) => <ResumeExperience key={item.id} experience={item} compact />)}</div></ResumeSection>}
         </main>
         <aside className="resume-side-column">
-          {page === 0 ? <ResumeSection title="Core competencies"><div className="competency-list">{resume.competencies.map((skill) => <span key={skill}>{skill}</span>)}</div></ResumeSection> : page === 1 ? <ResumeSection title="Selected awards"><div className="award-list">{resume.awards.map((item) => <div className="award-item" key={item.id}><strong>{item.title}</strong><span>{item.detail}</span></div>)}</div></ResumeSection> : <>
+          {page === 0 ? <ResumeSection title="Core competencies"><div className="competency-list">{resume.competencies.map((skill) => <span key={skill}>{skill}</span>)}</div></ResumeSection> : page === 1 ? <ResumeSection title="Selected awards"><div className="award-list">{resume.awards.map((item) => <div className="award-item" key={item.id}><strong>{item.title}</strong><span>{item.detail}</span></div>)}</div></ResumeSection> : page === 2 ? <>
             <ResumeSection title="Education"><div className="education-list">{resume.education.map((item) => <div className="education-item" key={item.id}><strong>{item.degree}</strong><span>{item.school}</span><small>{item.period}</small><em>{item.detail}</em></div>)}</div></ResumeSection>
             <ResumeSection title="Technical foundation"><div className="technical-list">{resume.technical.map((item) => <div key={item.category}><strong>{item.category}</strong><span>{item.items}</span></div>)}</div></ResumeSection>
-          </>}
+          </> : null}
         </aside>
       </div>
       <footer className="resume-paper-footer"><span>ELI LIN / RESUME</span><span>PAGE {page + 1} / {pageCount}</span></footer>
