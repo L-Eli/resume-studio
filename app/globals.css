@@ -96,6 +96,58 @@ a { color: inherit; }
 .competency-list { display: flex; flex-wrap: wrap; gap: 5px; }.competency-list span { padding: 5px 7px; border-radius: 6px; color: var(--paper-accent); background: var(--paper-soft); font-size: 8px; line-height: 1.2; }.award-list, .education-list, .technical-list { display: grid; gap: 11px; }.award-item, .education-item, .technical-list > div { display: grid; gap: 3px; }.award-item strong, .education-item strong, .technical-list strong { font-size: 9px; line-height: 1.3; }.award-item span, .education-item span, .technical-list span, .education-item em { color: var(--paper-muted); font-size: 8px; line-height: 1.38; }.education-item small { color: var(--paper-accent); font-size: 8px; font-weight: 800; }.education-item em { font-style: normal; }.resume-paper-footer { display: flex; justify-content: space-between; margin-top: auto; padding-top: 12px; color: var(--paper-muted); border-top: 1px solid color-mix(in srgb, var(--paper-accent), transparent 80%); font-size: 7px; font-weight: 850; letter-spacing: .16em; }
 .toast { position: fixed; right: 25px; bottom: 24px; z-index: 40; display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-radius: 11px; color: #eafff6; background: #15372d; box-shadow: 0 12px 30px rgba(21,55,45,.24); font-size: 12px; }
 
+.preview-toolbar-right { display: flex; align-items: center; gap: 14px; }
+.preview-page-controls { display: inline-flex; align-items: center; gap: 7px; padding: 4px; border: 1px solid var(--studio-border); border-radius: 10px; background: rgba(255,255,255,.56); color: var(--studio-muted); font-size: 12px; font-weight: 750; }
+.page-control { width: 27px; height: 27px; display: grid; place-items: center; border: 0; border-radius: 7px; color: var(--studio-ink); background: transparent; }
+.page-control:hover:not(:disabled) { background: rgba(30,138,104,.1); }
+.page-control:disabled { cursor: default; opacity: .3; }
+.preview-stage { flex-direction: column; align-items: center; }
+.preview-page { display: none; width: 100%; }
+.preview-page.is-active { display: flex; justify-content: center; }
+.resume-paper { width: 210mm; height: 297mm; min-height: 297mm; max-width: none; padding: 14mm 15mm 11mm; overflow: hidden; }
+.resume-paper-header { padding-bottom: 12px; }
+.resume-kicker { font-size: 9pt; letter-spacing: .18em; }
+.resume-name-row { align-items: baseline; flex-wrap: wrap; gap: 12px 16px; margin-top: 9px; }
+.resume-name-line { flex: 1 1 110mm; }
+.resume-name-row h1 { font-size: 40pt; line-height: .92; letter-spacing: -.065em; }
+.resume-short-name { font-size: 18pt; }
+.availability-pill { flex: 0 1 180px; max-width: 180px; margin-left: auto; padding: 7px 10px; font-size: 10pt; line-height: 1.2; }
+.resume-headline { margin-top: 12px; font-size: 12pt; line-height: 1.35; }
+.resume-contact-row { gap: 6px 14px; margin-top: 10px; font-size: 10pt; }
+.resume-paper-body { grid-template-columns: minmax(0, 1.65fr) minmax(58mm, .85fr); column-gap: 14mm; row-gap: 0; padding-top: 12mm; }
+.resume-section { margin-bottom: 14px; }
+.resume-section-label { gap: 7px; margin-bottom: 8px; font-size: 12pt; letter-spacing: .12em; }
+.resume-summary { font-size: 12pt; line-height: 1.42; }
+.resume-experience { margin-bottom: 12px; }
+.resume-experience-heading { gap: 12px; }
+.resume-experience-heading h3 { font-size: 14pt; line-height: 1.2; }
+.resume-experience-heading p { margin-top: 2px; font-size: 12pt; }
+.resume-experience-heading time { font-size: 11pt; }
+.resume-experience ul { margin-top: 6px; padding-left: 20px; font-size: 12pt; line-height: 1.34; }
+.resume-experience li { margin-bottom: 3px; padding-left: 2px; }
+.leadership-grid { gap: 9px 14px; }
+.competency-list { gap: 6px; }
+.competency-list span { padding: 5px 8px; font-size: 12pt; }
+.award-list, .education-list, .technical-list { gap: 9px; }
+.award-item, .education-item, .technical-list > div { gap: 3px; }
+.award-item strong, .education-item strong, .technical-list strong { font-size: 12pt; line-height: 1.3; }
+.award-item span, .education-item span, .technical-list span, .education-item em { font-size: 12pt; line-height: 1.35; }
+.education-item small { font-size: 11pt; }
+.resume-paper-footer { padding-top: 9px; font-size: 9pt; }
+.resume-continuation-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 12px; border-bottom: 1px solid color-mix(in srgb, var(--paper-accent), transparent 73%); }
+.resume-continuation-name { display: flex; align-items: baseline; gap: 9px; color: var(--paper-ink); }
+.resume-continuation-name strong { font-size: 20pt; letter-spacing: -.04em; }
+.resume-continuation-name span { color: var(--paper-muted); font-size: 12pt; }
+.resume-continuation-label { color: var(--paper-accent); font-size: 10pt; font-weight: 850; letter-spacing: .12em; text-align: right; }
+
+@media (min-width: 801px) {
+  html:has(.resume-studio), body:has(.resume-studio) { overflow: hidden; }
+  .studio-layout { height: calc(100vh - 86px); overflow: hidden; }
+  .editor-panel { height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding-right: 8px; }
+  .preview-panel { height: 100%; min-height: 0; position: relative; overflow: hidden; grid-template-rows: auto minmax(0, 1fr) auto; }
+  .preview-stage { height: 100%; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+}
+
 @media (max-width: 1100px) {
   .studio-layout { grid-template-columns: minmax(320px, 410px) minmax(0, 1fr); padding: 23px; gap: 18px; }
   .studio-header { padding-left: 23px; padding-right: 23px; }
@@ -114,14 +166,16 @@ a { color: inherit; }
 
 /* Keep the paper preview in the same A4 geometry as the printed document. */
 @media (max-width: 800px) {
-  .preview-stage { justify-content: flex-start; }
-  .resume-paper { width: 210mm; max-width: none; min-height: 297mm; padding: 17mm 17mm 12mm; }
+  .studio-layout { height: auto; overflow: visible; }
+  .editor-panel, .preview-panel { height: auto; overflow: visible; }
+  .preview-stage { height: calc(100vh - 190px); min-height: 420px; justify-content: flex-start; }
+  .resume-paper { width: 210mm; height: 297mm; max-width: none; min-height: 297mm; padding: 14mm 15mm 11mm; overflow: hidden; }
   .resume-name-row { display: flex; }
-  .resume-name-row h1 { font-size: clamp(40px, 4.7vw, 64px); }
+  .resume-name-row h1 { font-size: 40pt; }
   .availability-pill { margin-top: 0; display: block; max-width: 185px; text-align: right; }
-  .resume-headline { font-size: 15px; }
+  .resume-headline { font-size: 12pt; }
   .resume-contact-row { display: flex; gap: 8px 16px; }
-  .resume-paper-body { grid-template-columns: minmax(0, 1.55fr) minmax(155px, .7fr); column-gap: 27px; row-gap: 0; }
+  .resume-paper-body { grid-template-columns: minmax(0, 1.65fr) minmax(58mm, .85fr); column-gap: 14mm; row-gap: 0; }
   .resume-side-column { display: block; }
   .resume-side-column .resume-section, .resume-main-column .resume-section { margin-bottom: 23px; }
   .leadership-grid { grid-template-columns: 1fr 1fr; }
@@ -135,8 +189,11 @@ a { color: inherit; }
   html, body { background: #fff !important; }
   .studio-chrome, .editor-panel, .preview-toolbar, .preview-hint, .toast { display: none !important; }
   .resume-studio, .studio-layout, .preview-panel, .preview-stage { display: block; padding: 0; margin: 0; background: #fff; border: 0; min-height: 0; }
-  .resume-paper { width: 210mm; max-width: none; min-height: 297mm; margin: 0; padding: 17mm 17mm 12mm; box-shadow: none; page-break-after: avoid; }
-  .resume-paper-body { grid-template-columns: minmax(0, 1.55fr) minmax(155px, .7fr); column-gap: 27px; row-gap: 0; }
+  .preview-page, .preview-page.is-active { display: block !important; }
+  .preview-page { break-after: page; page-break-after: always; }
+  .preview-page:last-child { break-after: auto; page-break-after: auto; }
+  .resume-paper { width: 210mm; height: 297mm; max-width: none; min-height: 297mm; margin: 0; padding: 14mm 15mm 11mm; overflow: hidden; box-shadow: none; page-break-after: avoid; }
+  .resume-paper-body { grid-template-columns: minmax(0, 1.65fr) minmax(58mm, .85fr); column-gap: 14mm; row-gap: 0; }
   .resume-side-column { display: block; }
   .resume-experience { break-inside: avoid; page-break-inside: avoid; }
   .resume-experience-heading, .resume-section-label { break-after: avoid; page-break-after: avoid; }
