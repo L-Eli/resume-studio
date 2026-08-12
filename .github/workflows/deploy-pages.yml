@@ -1,0 +1,72 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build static export
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (static export)
+        run: npm run build
+        env:
+          GITHUB_PAGES: "true"
+
+      # assetPrefix 讓 vinext 把 _next 產在 dist/client/resume-studio/_next，
+      # 但 Pages 的網站根目錄就等於 /resume-studio/，所以要把它拉回上層。
+      - name: Reshape output for GitHub Pages
+        run: |
+          set -euo pipefail
+          test -f dist/client/index.html
+          mv dist/client/resume-studio/_next dist/client/_next
+          rmdir dist/client/resume-studio
+          # 沒有 .nojekyll 的話 Jekyll 會忽略底線開頭的 _next 目錄
+          touch dist/client/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/client
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

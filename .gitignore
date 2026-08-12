@@ -1,5 +1,6 @@
-# Next.js
+# Next.js / vinext
 /.next/
+/.vinext/
 /out/
 
 # Dependencies

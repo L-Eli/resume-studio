@@ -1,13 +1,11 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import type { ChangeEvent, ReactNode } from "react"
 import {
   Award,
   BriefcaseBusiness,
   Check,
-  ChevronLeft,
-  ChevronRight,
   Code2,
   Download,
   GraduationCap,
@@ -70,9 +68,7 @@ type ResumeData = {
   technical: { category: string; items: string }[]
 }
 
-type TemplateId = "signal" | "editorial" | "mono"
-
-const RESUME_PAGE_COUNT = 4
+type TemplateId = "signal" | "editorial" | "mono" | "classic" | "ledger" | "gazette"
 
 const starterResume: ResumeData = {
   personal: {
@@ -87,19 +83,15 @@ const starterResume: ResumeData = {
     availability: "Open to meaningful product challenges",
   },
   summary:
-    "AI product and technology leader with 8+ years across software engineering, enterprise AI, product strategy, and customer solutions. Helped scale APMIC through its US$1M Pre-A and US$7M Series A growth stages by building enterprise AI products, strengthening cross-functional execution, validating customer demand, and representing the company externally. Built CaiGunn from 0 to 1, coordinated up to 14 contributors, and led enterprise discovery across 50–80 prospects with roughly 15 proposals / POCs. Former Houzz and Garena engineer and WorldSkills Kazan 2019 Silver Medalist.",
+    "AI product leader who takes enterprise AI from first customer conversation to shipped product. Helped scale APMIC from its US$1M Pre-A to a US$7M Series A, built CaiGunn 0→1 with up to 14 contributors, and turned 50–80 enterprise conversations into ~15 proposals and POCs. Engineering background from Houzz and Garena; WorldSkills 2019 Silver Medalist.",
   competencies: [
     "AI Product Strategy",
-    "Enterprise GenAI / RAG",
+    "Context Engineering for Enterprise LLMs",
     "0→1 Product Development",
     "Growth-Stage Product Leadership",
     "Cross-functional Leadership",
-    "Engineering Leadership",
     "Technical Pre-sales",
-    "Solution Design",
-    "Enterprise Discovery",
-    "Product Operations",
-    "Public Speaking",
+    "Executive & External Storytelling",
   ],
   experiences: [
     {
@@ -108,12 +100,11 @@ const starterResume: ResumeData = {
       company: "APMIC",
       period: "Jan 2024 — Present",
       bullets: [
-        "Supported APMIC’s evolution through its US$1M Pre-A and US$7M Series A stages by strengthening product maturity, technical credibility, cross-functional execution, enterprise readiness, and the customer evidence behind the company’s growth story.",
-        "Led AI product strategy and cross-functional execution across product, engineering, AI systems, pre-sales, and enterprise delivery.",
-        "Built and launched CaiGunn from 0 to 1 in Apr 2024 under constrained engineering resources, coordinating 8–10-person teams and up to 14 contributors at peak.",
-        "Drove the integration and productization of RAG, inference, deployment, and hardware capabilities across PrivAI and PrivStation, launched in Sep 2025.",
-        "Engaged 50–80 prospects across financial services, government, and commercial sectors; led roughly 15 proposals / POCs from discovery and demo through solution design.",
-        "Represented APMIC at industry events and presented PrivStation in English at APICTA 2025, earning 2nd Runner-Up in Business Services.",
+        "Helped scale APMIC from its US$1M Pre-A to a US$7M Series A through enterprise product maturity, technical credibility, and customer evidence.",
+        "Built and launched CaiGunn from 0 to 1 in Apr 2024, coordinating 8–10-person teams and up to 14 contributors at peak.",
+        "Productized retrieval and context pipelines, inference, deployment, and hardware into PrivAI and PrivStation (launched Sep 2025).",
+        "Designed the document ingestion path behind enterprise retrieval — segmenting multi-column layouts before OCR, parsing tables into markdown with small models, and normalizing output to JSON so answers stayed faithful to the source.",
+        "Led ~15 enterprise proposals / POCs across 50–80 finance, government, and commercial prospects.",
       ],
     },
     {
@@ -122,8 +113,7 @@ const starterResume: ResumeData = {
       company: "APMIC",
       period: "Dec 2021 — Dec 2023",
       bullets: [
-        "Advised product and engineering leadership on architecture, organizational structure, delivery quality, talent development, and cross-functional collaboration.",
-        "Introduced end-to-end testing, supported difficult technical problem solving, and led an official website redesign initiative.",
+        "Advised product and engineering leadership on architecture, org structure, and delivery quality; introduced end-to-end testing and led an official website redesign.",
       ],
     },
     {
@@ -132,9 +122,8 @@ const starterResume: ResumeData = {
       company: "Houzz",
       period: "Dec 2020 — Mar 2024",
       bullets: [
-        "Owned consumer search improvements spanning search suggestions, cross-vertical result flows, SEO tooling, team documentation, and refactoring initiatives.",
-        "Reduced TTFB by approximately 100 ms (12.5%) through cache-service optimization and supported search experiences representing about 20% of search-result traffic.",
-        "Built production web experiences with React SSR and integrations across GraphQL / Thrift interfaces and frontend data architecture.",
+        "Owned consumer search experiences covering ~20% of search-result traffic — suggestions, cross-vertical result flows, and SEO tooling — from problem definition through rollout.",
+        "Led a cache-service optimization that cut time-to-first-byte ~100 ms (12.5%) on the highest-traffic search paths.",
       ],
     },
     {
@@ -143,8 +132,7 @@ const starterResume: ResumeData = {
       company: "Garena",
       period: "Oct 2019 — Dec 2020",
       bullets: [
-        "Built full-stack web experiences for game campaigns, collaborating with designers and backend engineers from implementation through delivery.",
-        "Resolved backend transaction and race-condition issues using locking strategies; improved API documentation and maintained GitLab CI/CD pipelines with workflow automation.",
+        "Shipped full-stack campaign experiences for game launches, coordinating designers and backend engineers end to end and hardening the release pipeline behind them.",
       ],
     },
     {
@@ -153,7 +141,7 @@ const starterResume: ResumeData = {
       company: "PIXNET",
       period: "2017 — 2018",
       bullets: [
-        "Developed backend and web platform features, APIs, automated tests, CI workflows, and reusable open-source utilities during contractor and internship engagements.",
+        "Early platform engineering across APIs, automated testing, and reusable open-source tooling.",
       ],
     },
   ],
@@ -164,7 +152,7 @@ const starterResume: ResumeData = {
       company: "WorldSkills Taiwan",
       period: "Aug 2022 — Present",
       bullets: [
-        "Provide technical leadership for Web Technologies in Taiwan, contributing to competition design, assessment alignment, judging consistency, and competitor / expert development.",
+        "Lead competition design, assessment alignment, and competitor / expert development for Web Technologies in Taiwan.",
       ],
     },
     {
@@ -173,14 +161,13 @@ const starterResume: ResumeData = {
       company: "WorldSkills Asia",
       period: "2nd & 3rd editions",
       bullets: [
-        "Represented Chinese Taipei as the official Web Technologies Expert, collaborating with international experts on technical standards, competition operations, and fair assessment.",
+        "Represented Chinese Taipei as official Web Technologies Expert, setting technical standards and assessment with international experts.",
       ],
     },
   ],
   awards: [
     { id: "apicta", title: "APICTA 2025", detail: "2nd Runner-Up, Business Services category — APMIC PrivStation" },
-    { id: "kazan", title: "WorldSkills Kazan 2019", detail: "Silver Medal, Web Technologies — Chinese Taipei" },
-    { id: "kazan-national", title: "45th WorldSkills Kazan", detail: "National Champion, Web Technologies — Chinese Taipei team selection" },
+    { id: "kazan", title: "WorldSkills Kazan 2019", detail: "Silver Medal, Web Technologies — Chinese Taipei (national champion in team selection)" },
     { id: "national-skills", title: "46th National Skills Competition", detail: "Gold Medal, Web Technologies (2017)" },
   ],
   education: [
@@ -193,9 +180,9 @@ const starterResume: ResumeData = {
     },
   ],
   technical: [
-    { category: "Frontend", items: "React, Vue, HTML/CSS, JavaScript, Node.js" },
-    { category: "Backend / API", items: "PHP/Laravel, Python/FastAPI, REST, GraphQL, Thrift" },
-    { category: "Platform", items: "Linux, Redis, MySQL, Docker, Kubernetes, Nginx, GitLab/Jenkins CI/CD" },
+    { category: "AI systems", items: "Context engineering — layout-aware document ingestion, retrieval and grounding, inference and deployment, private / on-prem AI" },
+    { category: "Product craft", items: "Enterprise discovery, POC to rollout, solution design, technical pre-sales" },
+    { category: "Engineering", items: "React / Node, Python / FastAPI, GraphQL / REST, Docker, Kubernetes — enough depth to review architecture and unblock teams" },
   ],
 }
 
@@ -217,6 +204,24 @@ const templateOptions: { id: TemplateId; name: string; description: string; pale
     name: "Mono",
     description: "極簡黑白，讓內容自己說話",
     palette: ["#ffffff", "#2158e8", "#152033"],
+  },
+  {
+    id: "classic",
+    name: "Classic",
+    description: "單欄襯線，沉穩學院感，適合資深職位",
+    palette: ["#ffffff", "#1c3f5f", "#1a1a18"],
+  },
+  {
+    id: "ledger",
+    name: "Ledger",
+    description: "單欄，細規線分隔，顧問／金融業偏好",
+    palette: ["#fbfaf7", "#5c5346", "#221f1a"],
+  },
+  {
+    id: "gazette",
+    name: "Gazette",
+    description: "單欄報章風，標題大而克制，敘事清晰",
+    palette: ["#ffffff", "#7a2222", "#16151a"],
   },
 ]
 
@@ -282,7 +287,6 @@ export function ResumeStudio() {
   const [resume, setResume] = useState<ResumeData>(() => clone(starterResume))
   const [template, setTemplate] = useState<TemplateId>("signal")
   const [activeView, setActiveView] = useState<"edit" | "preview">("edit")
-  const [activePage, setActivePage] = useState(0)
   const [savedAt, setSavedAt] = useState<string | null>(null)
   const [notice, setNotice] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -315,8 +319,9 @@ export function ResumeStudio() {
 
   useEffect(() => {
     previewStageRef.current?.scrollTo({ top: 0, behavior: "auto" })
-  }, [activePage])
+  }, [template])
 
+  const { pages, measureRef, main: measureMain, side: measureSide } = usePaginatedResume(resume, template)
   const activeTemplate = useMemo(() => templateOptions.find((item) => item.id === template) ?? templateOptions[0], [template])
 
   const updatePersonal = (key: keyof ResumeData["personal"], value: string) => {
@@ -518,7 +523,7 @@ export function ResumeStudio() {
               ))}
             </div>
             <div className="technical-editor">
-              <div className="subsection-label"><Code2 size={15} /> Technical foundation</div>
+              <div className="subsection-label"><Code2 size={15} /> Technical depth</div>
               {resume.technical.map((item, index) => <div className="technical-row" key={`${item.category}-${index}`}><input aria-label="技術分類" value={item.category} onChange={(event) => setResume((current) => ({ ...current, technical: current.technical.map((entry, entryIndex) => entryIndex === index ? { ...entry, category: event.target.value } : entry) }))} /><input aria-label="技術項目" value={item.items} onChange={(event) => setResume((current) => ({ ...current, technical: current.technical.map((entry, entryIndex) => entryIndex === index ? { ...entry, items: event.target.value } : entry) }))} /></div>)}
             </div>
           </section>
@@ -535,70 +540,232 @@ export function ResumeStudio() {
           <div className="preview-toolbar">
             <div><p className="eyebrow">Live preview</p><h2>{activeTemplate.name} template</h2></div>
             <div className="preview-toolbar-right">
-              <div className="preview-page-controls" aria-label="Resume preview pages">
-                <button className="page-control" aria-label="Previous page" onClick={() => setActivePage((page) => Math.max(0, page - 1))} disabled={activePage === 0}><ChevronLeft size={15} /></button>
-                <span>Page {activePage + 1} / {RESUME_PAGE_COUNT}</span>
-                <button className="page-control" aria-label="Next page" onClick={() => setActivePage((page) => Math.min(RESUME_PAGE_COUNT - 1, page + 1))} disabled={activePage === RESUME_PAGE_COUNT - 1}><ChevronRight size={15} /></button>
-              </div>
-              <div className="preview-meta"><span>A4 / print-ready</span><span>Last saved {savedAt ? new Date(savedAt).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" }) : "—"}</span></div>
+              <div className="preview-meta"><span>A4 / {pages.length} {pages.length === 1 ? "page" : "pages"} / print-ready</span><span>Last saved {savedAt ? new Date(savedAt).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" }) : "—"}</span></div>
             </div>
           </div>
           <div ref={previewStageRef} className="preview-stage">
-            {Array.from({ length: RESUME_PAGE_COUNT }, (_, page) => <div className={`preview-page ${activePage === page ? "is-active" : ""}`} key={page}><ResumePaper resume={resume} template={template} page={page} pageCount={RESUME_PAGE_COUNT} /></div>)}
+            {pages.map((content, page) => <div className="preview-page" key={page}><ResumePaper resume={resume} template={template} page={page} pageCount={pages.length} main={content.main} side={content.side} /></div>)}
           </div>
           <div className="preview-hint"><div className="hint-icon"><Printer size={15} /></div><p><strong>要存成 PDF？</strong> 按右上角「下載 PDF」，在列印視窗選擇「另存為 PDF」。目前頁面已針對 A4 與列印色彩最佳化。</p></div>
         </section>
       </div>
       <div className="print-resume" aria-hidden="true">
-        {Array.from({ length: RESUME_PAGE_COUNT }, (_, page) => <div className="print-page" key={page}><ResumePaper resume={resume} template={template} page={page} pageCount={RESUME_PAGE_COUNT} /></div>)}
+        {pages.map((content, page) => <div className="print-page" key={page}><ResumePaper resume={resume} template={template} page={page} pageCount={pages.length} main={content.main} side={content.side} /></div>)}
       </div>
+      <ResumeMeasurer measureRef={measureRef} resume={resume} template={template} main={measureMain} side={measureSide} />
       {notice && <div className="toast"><Check size={15} /> {notice}</div>}
     </main>
   )
 }
 
-function ResumePaper({ resume, template, page, pageCount }: { resume: ResumeData; template: TemplateId; page: number; pageCount: number }) {
+type Block = { id: string; section: string; node: ReactNode }
+type PageContent = { main: Block[]; side: Block[] }
+type Personal = ResumeData["personal"]
+
+/** Slack left at the bottom of every page so rounding in the measuring pass can never overflow it. */
+const PAGE_SAFETY_MARGIN = 12
+
+function ResumeHeaderContent({ personal }: { personal: Personal }) {
+  return (
+    <>
+      <div className="resume-kicker">AI PRODUCT / ENTERPRISE SYSTEMS / WEB TECHNOLOGIES</div>
+      <div className="resume-name-row"><div className="resume-name-line"><h1>{personal.name}</h1><p className="resume-short-name">{personal.shortName ? `“${personal.shortName}”` : ""}</p></div><span className="availability-pill">{personal.availability || "Open to meaningful work"}</span></div>
+      <p className="resume-headline">{personal.headline}</p>
+      <div className="resume-contact-row">
+        {personal.location && <span>{personal.location}</span>}
+        {personal.phone && <span>{personal.phone}</span>}
+        {personal.email && <a href={`mailto:${personal.email}`}>{personal.email}</a>}
+        {personal.linkedin && <a href={`https://${personal.linkedin.replace(/^https?:\/\//, "")}`} target="_blank" rel="noreferrer">{personal.linkedin.replace(/^https?:\/\//, "")}</a>}
+        {personal.website && <a href={personal.website.startsWith("http") ? personal.website : `https://${personal.website}`} target="_blank" rel="noreferrer">{personal.website.replace(/^https?:\/\//, "")}</a>}
+      </div>
+    </>
+  )
+}
+
+function ResumeContinuationContent({ personal }: { personal: Personal }) {
+  return (
+    <>
+      <div className="resume-continuation-name"><strong>{personal.name}</strong>{personal.shortName && <span>“{personal.shortName}”</span>}</div>
+      <span className="resume-continuation-label">CONTINUED</span>
+    </>
+  )
+}
+
+const SINGLE_COLUMN_TEMPLATES = new Set<TemplateId>(["classic", "ledger", "gazette"])
+const LEADERSHIP_SECTION = "Technical leadership"
+
+function buildBlocks(resume: ResumeData) {
+  const one = (id: string, section: string, node: ReactNode, keep: boolean): Block[] => (keep ? [{ id, section, node }] : [])
+  return {
+    summary: one("summary", "Executive summary", <p className="resume-summary">{resume.summary}</p>, Boolean(resume.summary.trim())),
+    competencies: one("competencies", "Core competencies", <div className="competency-list">{resume.competencies.map((skill, index) => <span key={skill}>{skill}{index < resume.competencies.length - 1 && <span className="competency-separator"> · </span>}</span>)}</div>, resume.competencies.length > 0),
+    experience: resume.experiences.map((experience) => ({ id: `exp-${experience.id}`, section: "Professional experience", node: <ResumeExperience experience={experience} /> })),
+    // The leadership grid lays items out side by side, so it has to be measured as one unit —
+    // measuring the items separately would size them at full column width and under-count.
+    leadership: one(
+      "leadership",
+      LEADERSHIP_SECTION,
+      <div className="leadership-grid">{resume.leadership.map((item) => <ResumeExperience key={item.id} experience={item} compact />)}</div>,
+      resume.leadership.length > 0,
+    ),
+    awards: one("awards", "Selected awards", <div className="award-list">{resume.awards.map((item) => <div className="award-item" key={item.id}><strong>{item.title}</strong><span>{item.detail}</span></div>)}</div>, resume.awards.length > 0),
+    education: one("education", "Education", <div className="education-list">{resume.education.map((item) => <div className="education-item" key={item.id}><strong>{item.degree}</strong><span>{item.school}</span><small>{item.period}</small><em>{item.detail}</em></div>)}</div>, resume.education.length > 0),
+    technical: one("technical", "Technical depth", <div className="technical-list">{resume.technical.map((item) => <div key={item.category}><strong>{item.category}</strong><span>{item.items}</span></div>)}</div>, resume.technical.length > 0),
+  }
+}
+
+/** Blocks in the same order the editor lists them, split per column for the chosen template. */
+function orderBlocks(resume: ResumeData, template: TemplateId): { main: Block[]; side: Block[] } {
+  const b = buildBlocks(resume)
+  if (SINGLE_COLUMN_TEMPLATES.has(template)) {
+    return { main: [...b.summary, ...b.competencies, ...b.experience, ...b.leadership, ...b.awards, ...b.education, ...b.technical], side: [] }
+  }
+  return { main: [...b.summary, ...b.experience, ...b.leadership], side: [...b.competencies, ...b.awards, ...b.education, ...b.technical] }
+}
+
+function renderBlockColumn(blocks: Block[]) {
+  const groups: { section: string; items: Block[] }[] = []
+  for (const block of blocks) {
+    const last = groups[groups.length - 1]
+    if (last && last.section === block.section) last.items.push(block)
+    else groups.push({ section: block.section, items: [block] })
+  }
+  return groups.map((group) => {
+    return (
+      <ResumeSection title={group.section} key={`${group.section}-${group.items[0].id}`}>
+        {group.items.map((item) => <Fragment key={item.id}>{item.node}</Fragment>)}
+      </ResumeSection>
+    )
+  })
+}
+
+/** Greedily fills pages, starting a fresh section label whenever a section continues onto a new page. */
+function fillPages(blocks: Block[], heightOf: (id: string) => number, labelCost: number, capacityFor: (page: number) => number) {
+  const pages: Block[][] = []
+  let current: Block[] = []
+  let used = 0
+  let section: string | null = null
+  for (const block of blocks) {
+    const cost = heightOf(block.id) + (block.section === section ? 0 : labelCost)
+    if (current.length > 0 && used + cost > capacityFor(pages.length)) {
+      pages.push(current)
+      current = [block]
+      used = heightOf(block.id) + labelCost
+      section = block.section
+      continue
+    }
+    current.push(block)
+    used += cost
+    section = block.section
+  }
+  if (current.length > 0) pages.push(current)
+  return pages
+}
+
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect
+
+/**
+ * Measures every block off-screen at its real column width, then flows the blocks
+ * into as many A4 pages as they need. Nothing is assigned to a page by index.
+ */
+function usePaginatedResume(resume: ResumeData, template: TemplateId) {
+  const measureRef = useRef<HTMLDivElement>(null)
+  const { main, side } = useMemo(() => orderBlocks(resume, template), [resume, template])
+  const [pages, setPages] = useState<PageContent[]>(() => [{ main, side }])
+
+  useIsomorphicLayoutEffect(() => {
+    const root = measureRef.current
+    if (!root) return
+    let cancelled = false
+
+    const measure = () => {
+      if (cancelled || !measureRef.current) return
+      const scope = measureRef.current
+      const paper = scope.querySelector<HTMLElement>(".resume-paper")
+      const body = scope.querySelector<HTMLElement>(".resume-paper-body")
+      if (!paper || !body) return
+
+      const probe = document.createElement("div")
+      probe.style.cssText = "position:absolute;visibility:hidden;height:297mm"
+      document.body.appendChild(probe)
+      const pageHeight = probe.getBoundingClientRect().height
+      probe.remove()
+
+      const outerHeight = (element: HTMLElement | null) => {
+        if (!element) return 0
+        const style = getComputedStyle(element)
+        return element.getBoundingClientRect().height + (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0)
+      }
+      const paperStyle = getComputedStyle(paper)
+      const chrome =
+        (parseFloat(paperStyle.paddingTop) || 0) +
+        (parseFloat(paperStyle.paddingBottom) || 0) +
+        (parseFloat(getComputedStyle(body).paddingTop) || 0) +
+        outerHeight(scope.querySelector('[data-measure="footer"]'))
+      const headerHeight = outerHeight(scope.querySelector('[data-measure="header"]'))
+      const continuationHeight = outerHeight(scope.querySelector('[data-measure="cont"]'))
+      const labelCost = outerHeight(scope.querySelector('[data-measure="label"]'))
+      const capacityFor = (page: number) => pageHeight - chrome - (page === 0 ? headerHeight : continuationHeight) - PAGE_SAFETY_MARGIN
+
+      const heights = new Map<string, number>()
+      scope.querySelectorAll<HTMLElement>("[data-block]").forEach((element) => {
+        const child = element.firstElementChild as HTMLElement | null
+        const trailingMargin = child ? parseFloat(getComputedStyle(child).marginBottom) || 0 : 0
+        heights.set(element.dataset.block ?? "", element.getBoundingClientRect().height + trailingMargin)
+      })
+      const heightOf = (id: string) => heights.get(id) ?? 0
+
+      const mainPages = fillPages(main, heightOf, labelCost, capacityFor)
+      const sidePages = side.length > 0 ? fillPages(side, heightOf, labelCost, capacityFor) : []
+      const count = Math.max(1, mainPages.length, sidePages.length)
+      setPages(Array.from({ length: count }, (_, index) => ({ main: mainPages[index] ?? [], side: sidePages[index] ?? [] })))
+    }
+
+    measure()
+    if (typeof document !== "undefined" && document.fonts && document.fonts.status !== "loaded") {
+      document.fonts.ready.then(measure).catch(() => {})
+    }
+    return () => {
+      cancelled = true
+    }
+  }, [main, side, template])
+
+  return { pages, measureRef, main, side }
+}
+
+function ResumeMeasurer({ measureRef, resume, template, main, side }: { measureRef: React.RefObject<HTMLDivElement | null>; resume: ResumeData; template: TemplateId; main: Block[]; side: Block[] }) {
+  return (
+    <div ref={measureRef} className="resume-measure" aria-hidden="true">
+      <article className={`resume-paper paper-${template}`} style={{ height: "auto" }}>
+        <header className="resume-paper-header" data-measure="header"><ResumeHeaderContent personal={resume.personal} /></header>
+        <header className="resume-continuation-header" data-measure="cont"><ResumeContinuationContent personal={resume.personal} /></header>
+        <div className="resume-paper-body">
+          <main className="resume-main-column">
+            <div className="resume-section" data-measure="label"><div className="resume-section-label"><span>Section</span><i /></div></div>
+            {main.map((block) => <div data-block={block.id} key={block.id}>{block.node}</div>)}
+          </main>
+          {side.length > 0 && <aside className="resume-side-column">{side.map((block) => <div data-block={block.id} key={block.id}>{block.node}</div>)}</aside>}
+        </div>
+        <footer className="resume-paper-footer" data-measure="footer"><span>ELI LIN / RESUME</span><span>PAGE 1 / 1</span></footer>
+      </article>
+    </div>
+  )
+}
+
+function ResumePaper({ resume, template, page, pageCount, main, side }: { resume: ResumeData; template: TemplateId; page: number; pageCount: number; main: Block[]; side: Block[] }) {
   const { personal } = resume
   const isOverview = page === 0
-  const firstExperience = resume.experiences[0]
-  const firstPageExperience = firstExperience ? [{ ...firstExperience, bullets: firstExperience.bullets.slice(0, 3) }] : []
-  const secondPageExperiences = firstExperience && firstExperience.bullets.length > 3
-    ? [{ ...firstExperience, bullets: firstExperience.bullets.slice(3) }, ...resume.experiences.slice(1, 2)]
-    : resume.experiences.slice(1, 2)
-  const experiences = page === 0 ? firstPageExperience : page === 1 ? secondPageExperiences : page === 2 ? resume.experiences.slice(2, 4) : resume.experiences.slice(4)
   return (
     <article className={`resume-paper paper-${template} ${isOverview ? "resume-page-overview" : "resume-page-continuation"}`}>
       {isOverview ? (
-        <header className="resume-paper-header">
-          <div className="resume-kicker">AI PRODUCT / ENTERPRISE SYSTEMS / WEB TECHNOLOGIES</div>
-          <div className="resume-name-row"><div className="resume-name-line"><h1>{personal.name}</h1><p className="resume-short-name">{personal.shortName ? `“${personal.shortName}”` : ""}</p></div><span className="availability-pill">{personal.availability || "Open to meaningful work"}</span></div>
-          <p className="resume-headline">{personal.headline}</p>
-          <div className="resume-contact-row">
-            {personal.location && <span>{personal.location}</span>}
-            {personal.phone && <span>{personal.phone}</span>}
-            {personal.email && <a href={`mailto:${personal.email}`}>{personal.email}</a>}
-            {personal.linkedin && <a href={`https://${personal.linkedin.replace(/^https?:\/\//, "")}`} target="_blank" rel="noreferrer">{personal.linkedin.replace(/^https?:\/\//, "")}</a>}
-            {personal.website && <a href={personal.website.startsWith("http") ? personal.website : `https://${personal.website}`} target="_blank" rel="noreferrer">{personal.website.replace(/^https?:\/\//, "")}</a>}
-          </div>
-        </header>
+        <header className="resume-paper-header"><ResumeHeaderContent personal={personal} /></header>
       ) : (
-        <header className="resume-continuation-header"><div className="resume-continuation-name"><strong>{personal.name}</strong>{personal.shortName && <span>“{personal.shortName}”</span>}</div><span className="resume-continuation-label">CONTINUED / EXPERIENCE &amp; LEADERSHIP</span></header>
+        <header className="resume-continuation-header"><ResumeContinuationContent personal={personal} /></header>
       )}
 
       <div className="resume-paper-body">
-        <main className="resume-main-column">
-          {isOverview && <ResumeSection title="Executive summary"><p className="resume-summary">{resume.summary}</p></ResumeSection>}
-          <ResumeSection title="Professional experience">
-            {experiences.map((experience) => <ResumeExperience key={experience.id} experience={experience} />)}
-          </ResumeSection>
-          {page === 3 && resume.leadership.length > 0 && <ResumeSection title="Technical leadership"><div className="leadership-grid">{resume.leadership.map((item) => <ResumeExperience key={item.id} experience={item} compact />)}</div></ResumeSection>}
-        </main>
-        <aside className="resume-side-column">
-          {page === 0 ? <ResumeSection title="Core competencies"><div className="competency-list">{resume.competencies.map((skill) => <span key={skill}>{skill}</span>)}</div></ResumeSection> : page === 1 ? <ResumeSection title="Selected awards"><div className="award-list">{resume.awards.map((item) => <div className="award-item" key={item.id}><strong>{item.title}</strong><span>{item.detail}</span></div>)}</div></ResumeSection> : page === 2 ? <>
-            <ResumeSection title="Education"><div className="education-list">{resume.education.map((item) => <div className="education-item" key={item.id}><strong>{item.degree}</strong><span>{item.school}</span><small>{item.period}</small><em>{item.detail}</em></div>)}</div></ResumeSection>
-            <ResumeSection title="Technical foundation"><div className="technical-list">{resume.technical.map((item) => <div key={item.category}><strong>{item.category}</strong><span>{item.items}</span></div>)}</div></ResumeSection>
-          </> : null}
-        </aside>
+        <main className="resume-main-column">{renderBlockColumn(main)}</main>
+        {side.length > 0 && <aside className="resume-side-column">{renderBlockColumn(side)}</aside>}
       </div>
       <footer className="resume-paper-footer"><span>ELI LIN / RESUME</span><span>PAGE {page + 1} / {pageCount}</span></footer>
     </article>
@@ -610,5 +777,5 @@ function ResumeSection({ title, children }: { title: string; children: ReactNode
 }
 
 function ResumeExperience({ experience, compact = false }: { experience: Experience | Leadership; compact?: boolean }) {
-  return <article className={`resume-experience ${compact ? "compact" : ""}`}><div className="resume-experience-heading"><div><h3>{experience.role}</h3><p>{experience.company}</p></div><time>{experience.period}</time></div><ul>{experience.bullets.map((bullet, index) => <li key={`${experience.id}-${index}`}>{bullet}</li>)}</ul></article>
+  return <article className={`resume-experience ${compact ? "compact" : ""}`}><div className="resume-experience-heading"><div><h3>{experience.role}</h3><p>{experience.company}{compact && <span className="meta-separator"> · </span>}</p></div><time>{experience.period}</time></div><ul>{experience.bullets.map((bullet, index) => <li key={`${experience.id}-${index}`}>{bullet}</li>)}</ul></article>
 }

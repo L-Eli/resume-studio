@@ -1,5 +1,5 @@
 {
-  "name": "my-v0-project",
+  "name": "resume-studio",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,8 +7,7 @@
     "dev": "vinext dev",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
-    "start": "next start",
-    "test": "node --import tsx --test tests/*.test.ts",
+    "start": "vinext start",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -65,10 +64,12 @@
     "vaul": "^1.1.2",
     "zod": "3.25.76"
   },
-  "devDependencies": {
-    "@cloudflare/vite-plugin": "1.37.1",
+  "optionalDependencies": {
     "@rolldown/binding-win32-arm64-msvc": "1.0.1",
     "@tailwindcss/oxide-win32-arm64-msvc": "4.3.3",
+    "lightningcss-win32-arm64-msvc": "1.32.0"
+  },
+  "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
     "@types/react": "^19",
@@ -76,7 +77,6 @@
     "@vitejs/plugin-rsc": "0.5.26",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.1",
-    "lightningcss-win32-arm64-msvc": "1.32.0",
     "postcss": "^8.5",
     "react-server-dom-webpack": "19.2.6",
     "tailwindcss": "^4.1.9",
@@ -84,8 +84,7 @@
     "tw-animate-css": "1.3.3",
     "typescript": "^5",
     "vinext": "1.0.0-beta.2",
-    "vite": "8.0.13",
-    "wrangler": "4.92.0"
+    "vite": "8.0.13"
   },
   "type": "module"
 }

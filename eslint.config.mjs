@@ -5,14 +5,10 @@ import nextTs from "eslint-config-next/typescript"
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  {
-    files: ["components/loading-screen.tsx"],
-    rules: {
-      "react-hooks/set-state-in-effect": "off",
-    },
-  },
   globalIgnores([
     ".next/**",
+    ".vinext/**",
+    "dist/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

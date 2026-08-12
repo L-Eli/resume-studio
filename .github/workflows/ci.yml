@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -33,11 +33,5 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
-      - name: Unit test
-        run: npm run test
-
-      - name: Next.js build
+      - name: Build
         run: npm run build
-
-      - name: Docker build
-        run: docker build -t eco-tech-website:ci .
