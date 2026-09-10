@@ -140,6 +140,8 @@ a { color: inherit; }
 .paper-ledger .resume-experience:last-child { border-bottom-color: transparent; }
 /* gazette: masthead rule under the name */
 .paper-gazette .resume-paper-header { border-bottom-width: 2.5px; }
+.paper-gazette .resume-kicker, .paper-gazette .availability-pill { display: none; }
+.paper-gazette .resume-name-row { margin-top: 0; }
 .paper-gazette .resume-section-label { color: var(--paper-ink); }
 .paper-gazette .resume-section-label i { background: color-mix(in srgb, var(--paper-ink), transparent 80%); }
 .resume-paper-header { padding-bottom: 19px; border-bottom: 1px solid color-mix(in srgb, var(--paper-accent), transparent 73%); }.resume-kicker { color: var(--paper-accent); font-size: 8px; letter-spacing: .22em; font-weight: 900; }.resume-name-row { display: flex; align-items: start; justify-content: space-between; gap: 20px; margin-top: 10px; }.resume-name-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; min-width: 0; }.resume-name-row h1 { margin: 0; font-size: clamp(40px, 4.7vw, 64px); line-height: .88; letter-spacing: -.075em; font-weight: 850; }.resume-short-name { margin: 0; color: var(--paper-muted); font-size: clamp(16px, 1.4vw, 20px); font-weight: 650; white-space: nowrap; }.availability-pill { flex: 0 0 auto; padding: 5px 11px; border: 1px solid color-mix(in srgb, var(--paper-accent), transparent 55%); border-radius: 999px; color: var(--paper-accent); background: var(--paper-soft); font-size: 8px; font-weight: 750; line-height: 1.3; letter-spacing: .01em; white-space: nowrap; }.resume-headline { margin: 6px 0 0; max-width: 660px; font-size: 15px; line-height: 1.35; font-weight: 650; letter-spacing: -.025em; text-wrap: balance; }.resume-contact-row { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 15px; color: var(--paper-muted); font-size: 9px; }.resume-contact-row span, .resume-contact-row a { position: relative; text-decoration: none; }.resume-contact-row span:not(:last-child)::after, .resume-contact-row a:not(:last-child)::after { content: ""; position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--paper-accent); right: -10px; top: 50%; }
@@ -154,6 +156,8 @@ a { color: inherit; }
 .resume-experience.continued ul { margin-top: 0; }
 .resume-experience.grouped .resume-experience-heading { display: block; }
 .resume-experience.grouped .resume-experience-heading h3 { font-size: 15pt; }
+.company-heading { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.company-heading time { color: var(--paper-muted); font-size: 10pt; font-weight: 500; white-space: nowrap; }
 .company-description { margin-top: 3px !important; color: var(--paper-muted) !important; font-size: 10pt !important; font-weight: 500 !important; letter-spacing: 0 !important; line-height: 1.35; }
 .role-timeline { display: grid; gap: 3px; margin-top: 7px; }
 .role-timeline span { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: baseline; color: var(--paper-ink); font-size: 11pt; font-weight: 750; }
@@ -223,6 +227,14 @@ a { color: inherit; }
 .resume-continuation-name strong { font-size: 20pt; letter-spacing: -.04em; }
 .resume-continuation-name span { color: var(--paper-muted); font-size: 12pt; }
 .resume-continuation-label { color: var(--paper-accent); font-size: 10pt; font-weight: 850; letter-spacing: .12em; text-align: right; }
+.paper-gazette .resume-name-row h1 { font-size: 30pt; }
+.paper-gazette .resume-section-label { font-size: 10.5pt; }
+.paper-gazette .resume-experience.grouped .resume-experience-heading h3 { font-size: 12pt; }
+.paper-gazette .role-entry-heading strong { font-size: 10.5pt; }
+.paper-gazette .role-timeline span { font-size: 9.75pt; }
+.paper-gazette .resume-experience:not(.grouped) .resume-experience-heading h3 { font-size: 11.5pt; }
+.paper-gazette .resume-experience:not(.grouped) .resume-experience-heading p { font-size: 10pt; }
+.paper-gazette .award-item strong, .paper-gazette .education-item strong, .paper-gazette .technical-list strong { font-size: 10.75pt; }
 
 @media (min-width: 801px) {
   html:has(.resume-studio), body:has(.resume-studio) { overflow: hidden; }

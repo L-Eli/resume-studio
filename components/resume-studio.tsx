@@ -873,14 +873,18 @@ function ResumeExperience({ experience, compact = false, continued = false, spli
     <article className={`resume-experience ${compact ? "compact" : ""} ${roles?.length ? "grouped" : ""} ${continued ? "continued" : ""} ${splitHead ? "split-head" : ""}`}>
       <div className="resume-experience-heading">
         <div>
-          <h3>{roles?.length ? experience.company : experience.role}</h3>
+          {roles?.length ? (
+            <div className="company-heading"><h3>{experience.company}</h3>{experience.period && <time>{experience.period}</time>}</div>
+          ) : (
+            <h3>{experience.role}</h3>
+          )}
           {roles?.length ? (
             <>
               {companyDescription && <p className="company-description">{companyDescription}</p>}
               {expandedRoles?.length ? (
                 <div className="role-stack">
                   {roles.map((role) => {
-                    const rolePeriod = roles.length === 1 ? experience.period : role.period
+                    const rolePeriod = role.period
                     return (
                       <div className="role-entry" key={`${experience.id}-${role.title}`}>
                         <div className="role-entry-heading"><strong>{role.title}</strong>{rolePeriod && <time>{rolePeriod}</time>}</div>
@@ -893,7 +897,7 @@ function ResumeExperience({ experience, compact = false, continued = false, spli
               ) : (
                 <div className="role-timeline">
                   {roles.map((role) => {
-                    const rolePeriod = roles.length === 1 ? experience.period : role.period
+                    const rolePeriod = role.period
                     return <span key={`${experience.id}-${role.title}`}>{role.title}{rolePeriod && <time>{rolePeriod}</time>}{role.note && <em>{role.note}</em>}</span>
                   })}
                 </div>
