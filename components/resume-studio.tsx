@@ -17,11 +17,20 @@ import {
   Upload,
 } from "lucide-react"
 
+type ExperienceRole = {
+  title: string
+  period?: string
+  note?: string
+  bullets?: string[]
+}
+
 type Experience = {
   id: string
   role: string
   company: string
   period: string
+  companyDescription?: string
+  roles?: ExperienceRole[]
   bullets: string[]
 }
 
@@ -226,6 +235,7 @@ const templateOptions: { id: TemplateId; name: string; description: string; pale
 ]
 
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T
+const isTemplateId = (value: unknown): value is TemplateId => templateOptions.some((option) => option.id === value)
 
 function safeResume(input: unknown): ResumeData {
   const candidate = input as Partial<ResumeData> | null
@@ -299,7 +309,7 @@ export function ResumeStudio() {
       try {
         const parsed = JSON.parse(raw) as { resume?: unknown; template?: TemplateId; savedAt?: string }
         if (parsed.resume) setResume(safeResume(parsed.resume))
-        if (parsed.template === "signal" || parsed.template === "editorial" || parsed.template === "mono") setTemplate(parsed.template)
+        if (isTemplateId(parsed.template)) setTemplate(parsed.template)
         if (parsed.savedAt) setSavedAt(parsed.savedAt)
       } catch {
         window.localStorage.removeItem("eli-resume-studio-v1")
@@ -349,7 +359,7 @@ export function ResumeStudio() {
       try {
         const parsed = JSON.parse(String(reader.result)) as { resume?: unknown; template?: TemplateId }
         setResume(safeResume(parsed.resume ?? parsed))
-        if (parsed.template === "signal" || parsed.template === "editorial" || parsed.template === "mono") setTemplate(parsed.template)
+        if (isTemplateId(parsed.template)) setTemplate(parsed.template)
         setNotice("JSON 已載入，預覽已更新")
       } catch {
         setNotice("這個檔案不是有效的履歷 JSON")
@@ -365,9 +375,51 @@ export function ResumeStudio() {
       ...current,
       experiences: [
         ...current.experiences,
-        { id: `experience-${Date.now()}`, role: "New role", company: "Company", period: "Year — Present", bullets: ["Describe the outcome, scope, or impact."] },
+        {
+          id: `experience-${Date.now()}`,
+          role: "New role",
+          company: "Company",
+          period: "Year — Present",
+          companyDescription: "Briefly describe what this company does.",
+          roles: [{ title: "New role", period: "Year — Present", note: "Scope or transition context", bullets: ["Describe the outcome, scope, or impact."] }],
+          bullets: [],
+        },
       ],
     }))
+  }
+
+  const roleStagesFor = (experience: Experience): ExperienceRole[] => {
+    if (experience.roles?.length) {
+      const hasRoleBullets = experience.roles.some((role) => role.bullets?.length)
+      if (!hasRoleBullets && experience.bullets.length > 0) {
+        return experience.roles.map((role, index) => (index === 0 ? { ...role, bullets: experience.bullets } : role))
+      }
+      return experience.roles
+    }
+    return [{ title: experience.role, period: experience.period, note: "", bullets: experience.bullets }]
+  }
+
+  const updateExperienceRoles = (experienceId: string, updater: (roles: ExperienceRole[], experience: Experience) => ExperienceRole[]) => {
+    setResume((current) => ({
+      ...current,
+      experiences: current.experiences.map((experience) => {
+        if (experience.id !== experienceId) return experience
+        const roles = updater(roleStagesFor(experience), experience)
+        return { ...experience, role: roles[0]?.title ?? experience.role, period: roles[0]?.period ?? experience.period, roles, bullets: [] }
+      }),
+    }))
+  }
+
+  const addExperienceRole = (experienceId: string) => {
+    updateExperienceRoles(experienceId, (roles) => [...roles, { title: "New role", period: "Year — Year", note: "Scope or transition context", bullets: ["Describe the responsibility, result, or technical impact."] }])
+  }
+
+  const updateExperienceRole = (experienceId: string, roleIndex: number, patch: Partial<ExperienceRole>) => {
+    updateExperienceRoles(experienceId, (roles) => roles.map((role, index) => (index === roleIndex ? { ...role, ...patch } : role)))
+  }
+
+  const removeExperienceRole = (experienceId: string, roleIndex: number) => {
+    updateExperienceRoles(experienceId, (roles) => roles.filter((_, index) => index !== roleIndex))
   }
 
   const addLeadership = () => {
@@ -449,7 +501,7 @@ export function ResumeStudio() {
 
           <section id="editor-positioning" className="editor-card">
             <SectionTitle icon={Sparkles} eyebrow="02 / Positioning" title="摘要與核心能力" />
-            <Field label="Executive summary" value={resume.summary} onChange={(value) => setResume((current) => ({ ...current, summary: value }))} multiline />
+            <Field label="Summary（每行一點）" value={resume.summary} onChange={(value) => setResume((current) => ({ ...current, summary: value }))} multiline />
             <div className="chip-editor">
               <span className="field-label">Core competencies</span>
               <div className="chip-list">
@@ -469,17 +521,34 @@ export function ResumeStudio() {
           <section id="editor-experience" className="editor-card">
             <div className="section-heading-row"><SectionTitle icon={BriefcaseBusiness} eyebrow="03 / Experience" title="專業經歷" /><button className="icon-button" aria-label="新增專業經歷" onClick={addExperience}><Plus size={17} /></button></div>
             <div className="repeat-list">
-              {resume.experiences.map((experience, index) => (
-                <div className="repeat-item" key={experience.id}>
-                  <div className="repeat-item-header"><span className="item-index">0{index + 1}</span><button className="icon-button danger" aria-label={`刪除 ${experience.role}`} onClick={() => setResume((current) => ({ ...current, experiences: current.experiences.filter((item) => item.id !== experience.id) }))}><Trash2 size={15} /></button></div>
-                  <div className="field-grid compact-grid">
-                    <Field label="職稱" value={experience.role} onChange={(value) => setResume((current) => ({ ...current, experiences: updateListItem(current.experiences, experience.id, { role: value }) }))} />
-                    <Field label="公司" value={experience.company} onChange={(value) => setResume((current) => ({ ...current, experiences: updateListItem(current.experiences, experience.id, { company: value }) }))} />
-                    <Field label="期間" value={experience.period} onChange={(value) => setResume((current) => ({ ...current, experiences: updateListItem(current.experiences, experience.id, { period: value }) }))} />
-                    <Field label="成果與責任（每行一點）" value={linesToText(experience.bullets)} onChange={(value) => setResume((current) => ({ ...current, experiences: updateListItem(current.experiences, experience.id, { bullets: textToLines(value) }) }))} multiline />
+              {resume.experiences.map((experience, index) => {
+                const roleStages = roleStagesFor(experience)
+                return (
+                  <div className="repeat-item" key={experience.id}>
+                    <div className="repeat-item-header"><span className="item-index">0{index + 1}</span><button className="icon-button danger" aria-label={`刪除 ${experience.company}`} onClick={() => setResume((current) => ({ ...current, experiences: current.experiences.filter((item) => item.id !== experience.id) }))}><Trash2 size={15} /></button></div>
+                    <div className="field-grid compact-grid">
+                      <Field label="公司" value={experience.company} onChange={(value) => setResume((current) => ({ ...current, experiences: updateListItem(current.experiences, experience.id, { company: value }) }))} />
+                      <Field label="公司總期間（選填）" value={experience.period} onChange={(value) => setResume((current) => ({ ...current, experiences: updateListItem(current.experiences, experience.id, { period: value }) }))} />
+                      <Field label="公司簡述（選填）" value={experience.companyDescription ?? ""} onChange={(value) => setResume((current) => ({ ...current, experiences: updateListItem(current.experiences, experience.id, { companyDescription: value }) }))} multiline />
+                    </div>
+                    <div className="role-editor">
+                      <div className="subsection-label"><BriefcaseBusiness size={15} /> Roles at this company</div>
+                      {roleStages.map((role, roleIndex) => (
+                        <div className="role-editor-card" key={`${experience.id}-role-${roleIndex}`}>
+                          <div className="repeat-item-header"><span className="item-index">ROLE {roleIndex + 1}</span><button className="icon-button danger" aria-label={`刪除 ${role.title}`} onClick={() => removeExperienceRole(experience.id, roleIndex)}><Trash2 size={15} /></button></div>
+                          <div className="field-grid compact-grid">
+                            <Field label="職稱 / 職級 / Function" value={role.title} onChange={(value) => updateExperienceRole(experience.id, roleIndex, { title: value })} />
+                            <Field label="期間" value={role.period ?? ""} onChange={(value) => updateExperienceRole(experience.id, roleIndex, { period: value })} />
+                            <Field label="補充（升遷、轉組、scope，可選）" value={role.note ?? ""} onChange={(value) => updateExperienceRole(experience.id, roleIndex, { note: value })} multiline />
+                            <Field label="成果與責任（每行一點）" value={linesToText(role.bullets ?? [])} onChange={(value) => updateExperienceRole(experience.id, roleIndex, { bullets: textToLines(value) })} multiline />
+                          </div>
+                        </div>
+                      ))}
+                      <button className="button button-ghost" type="button" onClick={() => addExperienceRole(experience.id)}><Plus size={15} /> 新增職稱階段</button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </section>
 
@@ -596,10 +665,29 @@ const LEADERSHIP_SECTION = "Technical leadership"
 
 function buildBlocks(resume: ResumeData) {
   const one = (id: string, section: string, node: ReactNode, keep: boolean): Block[] => (keep ? [{ id, section, node }] : [])
+  const experienceBlocks = resume.experiences.flatMap((experience) => {
+    if (experience.roles?.some((role) => role.bullets?.length)) return [{ id: `exp-${experience.id}`, section: "Work Experience", node: <ResumeExperience experience={experience} /> }]
+    if (experience.bullets.length <= 4) return [{ id: `exp-${experience.id}`, section: "Work Experience", node: <ResumeExperience experience={experience} /> }]
+
+    const firstBullets = experience.bullets.slice(0, 3)
+    const remainingBullets = experience.bullets.slice(3)
+    const continued: Experience = {
+      ...experience,
+      period: "",
+      companyDescription: undefined,
+      roles: undefined,
+      bullets: remainingBullets,
+    }
+    return [
+      { id: `exp-${experience.id}-1`, section: "Work Experience", node: <ResumeExperience experience={{ ...experience, bullets: firstBullets }} splitHead /> },
+      { id: `exp-${experience.id}-2`, section: "Work Experience", node: <ResumeExperience experience={continued} continued /> },
+    ]
+  })
+
   return {
-    summary: one("summary", "Executive summary", <p className="resume-summary">{resume.summary}</p>, Boolean(resume.summary.trim())),
+    summary: one("summary", "Summary", <ul className="resume-summary summary-list">{textToLines(resume.summary).map((line, index) => <li key={`summary-${index}`}>{line.replace(/^[-•]\s*/, "")}</li>)}</ul>, Boolean(resume.summary.trim())),
     competencies: one("competencies", "Core competencies", <div className="competency-list">{resume.competencies.map((skill, index) => <span key={skill}>{skill}{index < resume.competencies.length - 1 && <span className="competency-separator"> · </span>}</span>)}</div>, resume.competencies.length > 0),
-    experience: resume.experiences.map((experience) => ({ id: `exp-${experience.id}`, section: "Professional experience", node: <ResumeExperience experience={experience} /> })),
+    experience: experienceBlocks,
     // The leadership grid lays items out side by side, so it has to be measured as one unit —
     // measuring the items separately would size them at full column width and under-count.
     leadership: one(
@@ -776,6 +864,48 @@ function ResumeSection({ title, children }: { title: string; children: ReactNode
   return <section className="resume-section"><div className="resume-section-label"><span>{title}</span><i /></div>{children}</section>
 }
 
-function ResumeExperience({ experience, compact = false }: { experience: Experience | Leadership; compact?: boolean }) {
-  return <article className={`resume-experience ${compact ? "compact" : ""}`}><div className="resume-experience-heading"><div><h3>{experience.role}</h3><p>{experience.company}{compact && <span className="meta-separator"> · </span>}</p></div><time>{experience.period}</time></div><ul>{experience.bullets.map((bullet, index) => <li key={`${experience.id}-${index}`}>{bullet}</li>)}</ul></article>
+function ResumeExperience({ experience, compact = false, continued = false, splitHead = false }: { experience: Experience | Leadership; compact?: boolean; continued?: boolean; splitHead?: boolean }) {
+  const roles = "roles" in experience ? experience.roles?.filter((role) => role.title) : undefined
+  const companyDescription = "companyDescription" in experience ? experience.companyDescription : undefined
+  const expandedRoles = roles?.filter((role) => role.bullets?.length)
+
+  return (
+    <article className={`resume-experience ${compact ? "compact" : ""} ${roles?.length ? "grouped" : ""} ${continued ? "continued" : ""} ${splitHead ? "split-head" : ""}`}>
+      <div className="resume-experience-heading">
+        <div>
+          <h3>{roles?.length ? experience.company : experience.role}</h3>
+          {roles?.length ? (
+            <>
+              {companyDescription && <p className="company-description">{companyDescription}</p>}
+              {expandedRoles?.length ? (
+                <div className="role-stack">
+                  {roles.map((role) => {
+                    const rolePeriod = roles.length === 1 ? experience.period : role.period
+                    return (
+                      <div className="role-entry" key={`${experience.id}-${role.title}`}>
+                        <div className="role-entry-heading"><strong>{role.title}</strong>{rolePeriod && <time>{rolePeriod}</time>}</div>
+                        {role.note && <em>{role.note}</em>}
+                        {role.bullets?.length && <ul>{role.bullets.map((bullet, index) => <li key={`${experience.id}-${role.title}-${index}`}>{bullet}</li>)}</ul>}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="role-timeline">
+                  {roles.map((role) => {
+                    const rolePeriod = roles.length === 1 ? experience.period : role.period
+                    return <span key={`${experience.id}-${role.title}`}>{role.title}{rolePeriod && <time>{rolePeriod}</time>}{role.note && <em>{role.note}</em>}</span>
+                  })}
+                </div>
+              )}
+            </>
+          ) : (
+            <p>{experience.company}{compact && <span className="meta-separator"> · </span>}</p>
+          )}
+        </div>
+        {!roles?.length && experience.period && <time>{experience.period}</time>}
+      </div>
+      {(!expandedRoles?.length && experience.bullets.length > 0) && <ul>{experience.bullets.map((bullet, index) => <li key={`${experience.id}-${index}`}>{bullet}</li>)}</ul>}
+    </article>
+  )
 }
